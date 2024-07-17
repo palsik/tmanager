@@ -21,8 +21,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Take environment variables from .env file
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY', default='palsik86')
+
 
 
 
@@ -95,8 +94,8 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-# my secret key
-# SECRET_KEY = os.getenv("SECRET_KEY")
+
+
 if os.environ.get('DB_ENGINE') and os.environ.get('DB_ENGINE') == "postgreSQL":
     DATABASES = {
         'default': {
