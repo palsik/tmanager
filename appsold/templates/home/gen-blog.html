@@ -1,0 +1,116 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %} Generate Blog {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+
+
+{% block content %}
+
+    <!-- [ Main Content ] start -->
+    <div class="pcoded-main-container">
+        <div class="pcoded-wrapper">
+            <div class="pcoded-content">
+                <div class="pcoded-inner-content">
+                    <!-- [ breadcrumb ] start -->
+                    <div class="page-header">
+                        <div class="page-block">
+                            <div class="row align-items-center">
+                                <div class="col-md-12">
+                                    <div class="page-header-title">
+                                        <h5 class="m-b-10">Start Here to Define you Blog!</h5>
+                                    </div>
+{#                                    <ul class="breadcrumb">#}
+{#                                        <li class="breadcrumb-item"><a href="/"><i class="feather icon-home"></i></a></li>#}
+{#                                        <li class="breadcrumb-item"><a href="javascript:">Chart</a></li>#}
+{#                                        <li class="breadcrumb-item"><a href="javascript:">Morris Chart</a></li>#}
+{#                                    </ul>#}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- [ breadcrumb ] end -->
+                    <div class="main-body">
+                        <div class="page-wrapper">
+                            <!-- [ Main Content ] start -->
+                            <div class="row">
+                                <!-- [ Morris Chart ] start -->
+{#                                <div class="col-xl-6">#}
+{#                                    <div class="card">#}
+{#                                        <div class="card-header">#}
+{#                                            <h5>Bar [ Simple ] Chart</h5>#}
+{#                                        </div>#}
+{#                                        <div class="card-block">#}
+{#                                            <div id="morris-bar-chart" style="height:300px"></div>#}
+{#                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                                creating my layouts#}
+  <hr>
+                                        <div class="card-body">
+                                            <h5>Blog Definition</h5>
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <form>
+                                                        <div class="container-fluid flex-md-grow-1 container-p-y">
+                                                            <div class="layout-demo-wrapper">
+                                                                <div class="row">
+                                                                    <img class="col-lg-6">
+                                                                        <img class="img-fluid" src="{% static 'assets/images/write.svg'%}" alt="Create Blog">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                                 <div class="col-md-6">
+                                                    <form class="" action="{% url 'frm-gen-blogt' %}" method="post">
+                                                        {% csrf_token %}
+                                                        <div class="form-group">
+                                                            <label for="blogIdea">Blog Idea</label>
+                                                            <input type="text" class="form-control" name="blogIdea" aria-describedby="emailHelp" placeholder="Enter Blog Idea" >
+                                                            <small id="blogidea" class="form-text text-muted">Enter a brief Description of your Blog</small>
+                                                        </div>
+                                                           <div class="form-group">
+                                                            <label for="keywords"> Blog Audience</label>
+                                                            <input type="text" class="form-control" name="audience" placeholder="Who is the blog targeted at">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="keywords">Blog Key Words</label>
+                                                            <input type="text" class="form-control" name="keywords" placeholder="What key words should we use">
+                                                        </div>
+                                                        <button type="submit" value="submit" class="btn btn-primary">Generate</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                            <hr>
+
+                                <!-- [ Morris Chart ] end -->
+                            </div>
+                            <!-- [ Main Content ] end -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    <!-- [ Main Content ] end -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    <!-- chart-morris Js -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="{{ ASSETS_ROOT }}/plugins/chart-morris/js/raphael.min.js"></script>
+    <script src="{{ ASSETS_ROOT }}/plugins/chart-morris/js/morris.min.js"></script>
+    <script src="{{ ASSETS_ROOT }}/js/pages/chart-morris-custom.js"></script>
+
+{% endblock javascripts %}

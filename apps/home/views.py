@@ -27,6 +27,7 @@ from django.db.models import Min, Max
 import logging
 from datetime import date
 from datetime import date, datetime
+from django.http import HttpResponseBadRequest
 
 logger = logging.getLogger(__name__)
 
@@ -408,48 +409,24 @@ def dashboard_view(request):
     department = user_profile.department
     user_type = user_profile.user_type
 
-    print('this is the user at the dashboard_view :'+ str(department))
+    print('this is the user at the dashboard_view :' + str(department))
 
     if department == 'auditing':
-        user = request.user
-        tasks = Task.objects.filter(assigned_personnel=user)
-        assigned_recurring_tasks = RecurringTask.objects.filter(assigned_personnel=user_profile)
-        print(f"Assigned recurring tasks for {user.username}: {assigned_recurring_tasks}")
-        return render(request, "home/adt_dashboard.html", {
-            "user_tasks": tasks,
-            "assigned_recurring_tasks": assigned_recurring_tasks
-        })
+        return auditing_dashboard(request)
     
     elif department == 'bookkeeping':
-        user = request.user
-        tasks = Task.objects.filter(assigned_personnel=user)
-        assigned_recurring_tasks = RecurringTask.objects.filter(assigned_personnel=user_profile)
-        print(f"Assigned recurring tasks for {user.username}: {assigned_recurring_tasks}")
-        return render(request, "home/bk_dashboard.html", {
-            "user_tasks": tasks,
-            "assigned_recurring_tasks": assigned_recurring_tasks
-        })
+        return bookkeeping_dashboard(request)
     
     elif user_type == 'supervisor':
-        tasks_pending = Task.objects.filter(status='pending')
-        tasks_in_progress = Task.objects.filter(status='in_progress')
-        tasks_completed = Task.objects.filter(status='completed')
-        all_recurring_tasks = RecurringTask.objects.all()
-
-        return render(request, "home/supervisor.html", {
-            "tasks_pending": tasks_pending,
-            "tasks_in_progress": tasks_in_progress,
-            "tasks_completed": tasks_completed,
-            "all_recurring_tasks": all_recurring_tasks
-        })
+        return supervisor_dashboard(request)
     else:
-        return redirect('home')  # Or some default view 
+        return redirect('home')
 
 @login_required
 def auditing_dashboard(request):
     user = request.user
     tasks = Task.objects.filter(assigned_personnel=user)
-    
+
     try:
         personnel_profile = Profile1.objects.get(user=user)
         assigned_recurring_tasks = RecurringTask.objects.filter(assigned_personnel=personnel_profile)
@@ -501,7 +478,9 @@ def supervisor_dashboard(request):
 def task_detail(request, task_id):
     task = get_object_or_404(Task, task_id=task_id)
     user_profile = Profile1.objects.get(user=request.user)
-    
+    directories = TaskDirectory.objects.filter(task=task)
+    files = TaskFile.objects.filter(directory__in=directories)
+
     if request.method == 'POST':
         if 'update_task' in request.POST:
             task.remarks = request.POST.get('remarks', '')
@@ -521,11 +500,35 @@ def task_detail(request, task_id):
                 response = HttpResponse(file.read(), content_type='application/octet-stream')
                 response['Content-Disposition'] = f'attachment; filename={task.file.name}'
                 return response
+        elif 'create_directory' in request.POST:
+            directory_name = request.POST.get('directory_name')
+            if directory_name:
+                TaskDirectory.objects.create(
+                    name=directory_name,
+                    task=task,
+                    created_by=request.user
+                )
+                return redirect('task_detail', task_id=task_id)
+        elif 'upload_files' in request.POST:
+            description = request.POST.get('file_description', '')
+            if 'files' in request.FILES:
+                for uploaded_file in request.FILES.getlist('files'):
+                    TaskFile.objects.create(
+                        directory=TaskDirectory.objects.get(task=task),  # Assuming files are uploaded to the main task directory
+                        file=uploaded_file,
+                        uploaded_by=request.user,
+                        description=description
+                    )
+                return redirect('task_detail', task_id=task_id)
 
     return render(request, 'home/task_detail.html', {
         'task': task,
-        'user_profile': user_profile
+        'user_profile': user_profile,
+        'directories': directories,
+        'files': files,
+        'subtasks': task.subtasks.all()  # Adjust according to your actual subtask relationship
     })
+
 
 @login_required
 def fetch_tasks_by_type(request):
@@ -600,7 +603,7 @@ def create_recurring_task(request):
                     task_file = RecurrentFiles.objects.create(file=file)
                     recurring_task.files.add(task_file)
 
-            create_task_directories(recurring_task)
+            # create_task_directories(recurring_task)
 
             print("Recurring task created successfully")
             return JsonResponse({'message': 'Recurring task created successfully'})
@@ -619,7 +622,7 @@ def update_recurring_task(request, task_id):
         status = request.POST.get('status')
         remarks = request.POST.get('remarks')
 
-        task_update = TaskUpdate.objects.create(
+        task_update = RTaskUpdate.objects.create(
             task=task,
             status=status,
             remarks=remarks
@@ -644,48 +647,12 @@ def recurring_task_detail(request, task_id):
     })
 
 def client_recurring_tasks(request, client_username):
-    client_profile = get_object_or_404(Profile1, user__username=client_username)
-    recurring_tasks = RecurringTask.objects.filter(client=client_profile)
-
+    client = get_object_or_404(Profile1, user__username=client_username)
+    recurring_tasks = RecurringTask.objects.filter(client=client)
     return render(request, 'home/client_recurring_tasks.html', {
-        'client': client_profile,
+        'client': client,
         'recurring_tasks': recurring_tasks,
     })
-
-def create_task_directories(task):
-    print('The Create Task Directories function has been reached')
-    task_path = os.path.join(settings.MEDIA_ROOT, 'recurrent_task_files', str(task.client.id), task.task_name)
-    
-    start_date = task.start_date  # Use the already converted date object
-    print(f'Converted start_date: {start_date}')
-
-    if task.interval == 'monthly':
-        for month in range(1, 13):
-            month_name = date(1900, month, 1).strftime('%B')
-            month_path = os.path.join(task_path, month_name)
-            print(f'Creating directory: {month_path}')
-            os.makedirs(month_path, exist_ok=True)
-            
-            TaskDirectory.objects.create(
-                task=task,
-                client=task.client,
-                year=start_date.year,
-                month=month_name,
-                path=month_path
-            )
-    elif task.interval == 'yearly':
-        print(f'Creating directory: {task_path}')
-        os.makedirs(task_path, exist_ok=True)
-        
-        TaskDirectory.objects.create(
-            task=task,
-            client=task.client,
-            year=start_date.year,
-            path=task_path
-        )
-
-    print('Directory creation process completed')
-
 
 @login_required
 def recurring_task_detail(request, task_id):
@@ -729,9 +696,257 @@ def personnel_assigned_Rtasks(request, personnel_username):
         'assigned_tasks': assigned_tasks,
     })
 
-def personnel_recurring_task_detail(request, pk):
+@login_required
+def personnel_recurring_task_detail(request, task_id):
+    task = get_object_or_404(RecurringTask, id=task_id)
+    updates = RTaskUpdate.objects.filter(task=task)
+    directories = RTaskDirectory.objects.filter(task=task, parent_directory__isnull=True)
+
+    if request.method == 'POST':
+        if 'create_directory' in request.POST:
+            return Rcreate_directory(request, task_id)
+        elif 'upload_file' in request.POST:
+            directory_id = request.POST.get('directory_id')
+            if directory_id:
+                return Rupload_file(request, task_id, directory_id)
+
+    return render(request, 'home/personnel_recurring_task_detail.html', {
+        'task': task,
+        'updates': updates,
+        'directories': directories,
+    })
+@login_required
+def supervisor_recurring_task_detail(request, task_id):
+    print('supervisor_recurring_task_detail has been reached')
+    task = get_object_or_404(RecurringTask, id=task_id)
+    updates = RTaskUpdate.objects.filter(task=task)
+    directories = RTaskDirectory.objects.filter(task=task, parent_directory__isnull=True)
+
+    if request.method == 'POST':
+        if 'create_directory' in request.POST:
+            return Rcreate_directory(request, task_id)
+        elif 'upload_file' in request.POST:
+            directory_id = request.POST.get('directory_id')
+            print(f"Directory ID from POST: {directory_id}")
+            if directory_id:
+                return Rupload_file(request, task_id, directory_id)
+
+    return render(request, 'home/supervisor_recurring_task_detail.html', {
+        'task': task,
+        'updates': updates,
+        'directories': directories,
+    })
+
+def create_directory_in_media(path):
+    """
+    Utility function to create a directory in the media folder.
+    """
+    os.makedirs(path, exist_ok=True)
+
+@login_required
+def Rcreate_directory(request, task_id):
+    task = get_object_or_404(RecurringTask, id=task_id)
+    user = request.user
+
+    try:
+        main_directory = RTaskDirectory.objects.get(task=task, parent_directory__isnull=True, name=task.task_name)
+    except RTaskDirectory.DoesNotExist:
+        main_directory = RTaskDirectory.objects.create(
+            task=task,
+            name=task.task_name,
+            created_by=request.user
+        )
+        create_directory_in_media(os.path.join(settings.MEDIA_ROOT, 'recurrent_task_files', str(main_directory.id)))
+
+    if request.method == 'POST':
+        directory_name = request.POST.get('directory_name')
+        parent_directory_id = request.POST.get('parent_directory_id')
+        parent_directory = None
+        if parent_directory_id:
+            parent_directory = get_object_or_404(RTaskDirectory, id=parent_directory_id)
+
+        new_directory = RTaskDirectory.objects.create(
+            task=task,
+            name=directory_name,
+            parent_directory=parent_directory or main_directory,
+            created_by=request.user
+        )
+        parent_directory_path = os.path.join(settings.MEDIA_ROOT, 'recurrent_task_files', str(main_directory.id))
+        create_directory_in_media(os.path.join(parent_directory_path, str(new_directory.id)))
+
+        print(f"Directory created: {new_directory.name}")
+
+        profile = Profile1.objects.get(user=user)
+        if profile.user_type == 'personnel':  # Assuming user_type attribute exists
+            return redirect('personnel_recurring_task_detail', task_id=task_id)
+        else:
+            return redirect('supervisor_recurring_task_detail', task_id=task_id)
+
+    updates = RTaskUpdate.objects.filter(task=task)
+    directories = RTaskDirectory.objects.filter(task=task, parent_directory__isnull=True)
+    
+    profile = Profile1.objects.get(user=user)
+    if profile.user_type == 'personnel':  # Assuming user_type attribute exists
+        template = 'home/personnel_recurring_task_detail.html'
+    else:
+        template = 'home/supervisor_recurring_task_detail.html'
+
+    return render(request, template, {
+        'task': task,
+        'updates': updates,
+        'directories': directories,
+    })
+
+@login_required
+def Rupload_file(request, task_id, directory_id):
+    print(f"Upload file view called with task_id: {task_id} and directory_id: {directory_id}")
+    task = get_object_or_404(RecurringTask, id=task_id)
+    directory = get_object_or_404(RTaskDirectory, id=directory_id)
+
+    if 'file' not in request.FILES:
+        return HttpResponseBadRequest("No file uploaded")
+
+    uploaded_file = request.FILES['file']
+    description = request.POST.get('description', '')
+
+    file_instance = RTaskFile(
+        directory=directory,
+        file=uploaded_file,
+        uploaded_by=request.user,
+        description=description
+    )
+    file_instance.save()
+    print(f"File uploaded: {uploaded_file.name}")
+
+    return redirect('supervisor_recurring_task_detail', task_id=task_id)
+
+@login_required
+def delete_directory(request, directory_id):
+    directory = get_object_or_404(RTaskDirectory, id=directory_id)
+    task_id = directory.task.id
+    if request.user.profile1.user_type == 'supervisor':
+        directory.delete()
+        messages.success(request, 'Directory deleted successfully.')
+    else:
+        messages.error(request, 'You do not have permission to delete this directory.')
+    return redirect('supervisor_recurring_task_detail', task_id=task_id)
+
+@login_required
+def delete_file(request, file_id):
+    rtask_file = get_object_or_404(RTaskFile, id=file_id)
+    task_id = rtask_file.directory.task.id
+    if request.user.profile1.user_type == 'supervisor':
+        rtask_file.delete()
+        messages.success(request, 'File deleted successfully.')
+    else:
+        messages.error(request, 'You do not have permission to delete this file.')
+    return redirect('supervisor_recurring_task_detail', task_id=task_id)
+
+@login_required
+def recurring_directory_details(request, directory_id):
+    directory = get_object_or_404(RTaskDirectory, id=directory_id)
+    task = directory.task
+    subdirectories = directory.subdirectories.all()
+    files = directory.files.all()
+
+    files_with_basename = [
+        {
+            'basename': os.path.basename(file.file.name),
+            'description': file.description,
+            'uploaded_by': file.uploaded_by,
+            'upload_date': file.upload_date,
+            'url': file.file.url
+        }
+        for file in files
+    ]
+
+    path = []
+    current_directory = directory
+    while current_directory is not None:
+        path.insert(0, current_directory)
+        current_directory = current_directory.parent_directory
+
+    if request.method == 'POST':
+        if 'create_subdirectory' in request.POST:
+            subdirectory_name = request.POST.get('subdirectory_name')
+            if subdirectory_name:
+                RTaskDirectory.objects.create(
+                    name=subdirectory_name,
+                    task=task,
+                    parent_directory=directory,
+                    created_by=request.user
+                )
+                return redirect('recurring_directory_details', directory_id=directory_id)
+        elif 'upload_file' in request.POST:
+            if 'files' in request.FILES:
+                uploaded_files = request.FILES.getlist('files')
+                description = request.POST.get('description', '')
+                for uploaded_file in uploaded_files:
+                    RTaskFile.objects.create(
+                        directory=directory,
+                        file=uploaded_file,
+                        uploaded_by=request.user,
+                        description=description
+                    )
+                return redirect('recurring_directory_details', directory_id=directory_id)
+
+    return render(request, 'home/recurring_directory_details.html', {
+        'directory': directory,
+        'task': task,
+        'subdirectories': subdirectories,
+        'files': files_with_basename,
+        'path': path,
+    })
+
+def task_file_path(instance, filename):
+    return f'recurrent_task_files/{instance.directory.task.id}/files/{filename}'
+
+@login_required
+def create_subdirectory(request, directory_id):
+    if request.method == 'POST':
+        parent_directory = get_object_or_404(RTaskDirectory, id=directory_id)
+        subdirectory_name = request.POST.get('subdirectory_name')
+        new_subdirectory = RTaskDirectory(
+            name=subdirectory_name,
+            task=parent_directory.task,
+            parent_directory=parent_directory,
+            created_by=request.user,
+        )
+        new_subdirectory.save()
+        print(f"Subdirectory created: {new_subdirectory.name}")
+        return redirect('recurring_directory_details', directory_id=directory_id)
+    else:
+        return HttpResponseBadRequest("Invalid request method")
+    
+@login_required
+def upload_files(request, directory_id):
+    if request.method == 'POST':
+        directory = get_object_or_404(RTaskDirectory, id=directory_id)
+        files = request.FILES.getlist('files')
+        descriptions = request.POST.getlist('descriptions')
+        for file, description in zip(files, descriptions):
+            file_instance = RTaskFile(
+                directory=directory,
+                file=file,
+                description=description,
+                uploaded_by=request.user,
+                upload_date=timezone.now()
+            )
+            file_instance.save()
+            print(f"File uploaded: {file.name}, Description: {description}")
+        return redirect('recurring_directory_details', directory_id=directory_id)
+    else:
+        return HttpResponseBadRequest("Invalid request method")
+
+@login_required
+def Radd_task_update(request, pk):
     task = get_object_or_404(RecurringTask, pk=pk)
-    return render(request, 'home/personnel_recurring_task_detail.html', {'task': task})
+    if request.method == 'POST':
+        update_text = request.POST.get('update_text')
+        task_update = RTaskUpdate(task=task, update_text=update_text, updated_by=request.user.profile1)
+        task_update.save()
+        return redirect('personnel_recurring_task_detail', pk=pk)
+    return JsonResponse({"error": "Invalid request method"}, status=400)           
 
 @login_required(login_url="/login/")
 def blogTopic(request):

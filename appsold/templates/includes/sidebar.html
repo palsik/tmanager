@@ -1,0 +1,45 @@
+<!-- sidebar.html -->
+<nav class="pcoded-navbar">
+    <div class="navbar-wrapper">
+        <div class="navbar-brand header-logo">
+            <a href="/" class="b-brand">
+                <div class="b-bg">
+                    <i class="feather icon-trending-up"></i>
+                </div>
+                <span class="b-title">NELKINS</span>
+            </a>
+            <a class="mobile-menu" id="mobile-collapse" href="javascript:"><span></span></a>
+        </div>
+        <div class="navbar-content scroll-div">
+            <ul class="nav pcoded-inner-navbar">
+                <li class="nav-item pcoded-menu-caption">
+                    <label>Navigation</label>
+                </li>
+                <li data-username="dashboard"
+                    class="nav-item {% if 'dashboard' in request.path %} active {% endif %}">
+                    <a href="{% url 'dashboard' %}" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-home"></i></span>
+                        <span class="pcoded-mtext">Dashboard</span>
+                    </a>
+                </li>
+                <li data-username="Profile Page"
+                    class="nav-item {% if 'profile' in request.path %} active {% endif %}">
+                    <a href="{% url 'submit-profile' %}" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-user"></i></span>
+                        <span class="pcoded-mtext">Profile Page</span>
+                    </a>
+                </li>
+                <li class="nav-item pcoded-menu-caption">
+                    <label>Blog Generator</label>
+                </li>
+                <li data-username="form elements"
+                    class="nav-item {% if 'form_elements' in request.path %} active {% endif %}">
+                    <a href="/gen-blog.html" class="nav-link">
+                        <span class="pcoded-micon"><i class="feather icon-file-text"></i></span>
+                        <span class="pcoded-mtext">View Statistics</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

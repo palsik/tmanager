@@ -408,7 +408,7 @@ $(document).ready(function() {
     $('#fetchClientsButton').click(function() {
         console.log('Fetch Clients button clicked'); // Debugging line
         $.ajax({
-            url: '/fetch_clients',
+            url: '/fetch_clients/',
             type: 'GET',
             success: function(data) {
                 console.log('Data:', data); // Debugging line
@@ -510,7 +510,110 @@ $(document).ready(function() {
             })
             .catch(error => console.error('Error creating recurring task:', error));
         });
+
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    // Extract the directory ID from a data attribute or other source
+                    const directoryId = this.querySelector('input[name="directory_id"]').value;
+                    
+                    // Check if directoryId is valid
+                    if (!directoryId) {
+                        alert('Directory ID is missing.');
+                        event.preventDefault(); // Prevent form submission for debugging
+                        return;
+                    }
+
+                    // Append directory ID to the form data
+                    const formData = new FormData(this);
+                    formData.append('directory_id', directoryId);
+
+                    // Create a new XMLHttpRequest object
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', this.action, true);
+                    xhr.onload = function () {
+                        if (xhr.status === 200) {
+                            console.log('File uploaded successfully');
+                            // Optionally, handle success response
+                        } else {
+                            console.log('Error uploading file');
+                            // Optionally, handle error response
+                        }
+                    };
+                    xhr.send(formData);
+                    
+                    // Prevent the default form submission
+                    event.preventDefault();
+                });
+            });
+        });
+       
     });
 
+    ////For recurring task creating multiple uploads files
+    document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('uploadForm').addEventListener('submit', function (event) {
+        // Confirm submission
+        if (!confirm('Are you sure you want to upload these files?')) {
+            event.preventDefault();
+            return;
+        }
+
+        // Ensure directory_id is included
+        const directoryId = this.querySelector('input[name="directory_id"]').value;
+        if (!directoryId) {
+            alert('Directory ID is missing.');
+            event.preventDefault();
+        }
+    });
+});
+
+function addFileInput() {
+    const container = document.getElementById('file-input-container');
+    const newInput = document.createElement('div');
+    newInput.className = 'file-input-group';
+    newInput.innerHTML = `
+        <input type="file" name="files" required multiple>
+        <button type="button" onclick="removeFileInput(this)">Remove</button>
+    `;
+    container.appendChild(newInput);
+}
+
+function removeFileInput(button) {
+    button.parentElement.remove();
+}
+
+//For confirming deletion of directory and files
+function confirmDelete(entityType, entityId) {
+    const url = `/delete_${entityType}/${entityId}/`; // Construct the URL based on the entity type and ID
+    if (confirm("Are you sure you want to delete this " + entityType + "?")) {
+        window.location.href = url;
+    }
+}
+
+// Add file input on single tasks
+function addFileInput() {
+    var container = document.getElementById('file-input-container');
+    var div = document.createElement('div');
+    div.className = 'form-group';
+    div.innerHTML = `
+        <input type="file" name="files" multiple>
+        <input type="text" name="file_description" placeholder="File Description" class="form-control" style="margin-top: 10px;">
+        <button type="button" onclick="removeFileInput(this)" class="btn btn-danger" style="margin-top: 10px;">Remove</button>
+    `;
+    container.appendChild(div);
+}
+
+// Remove file input
+function removeFileInput(button) {
+    var container = document.getElementById('file-input-container');
+    container.removeChild(button.parentElement);
+}
+
+//sudirectory  management
+
+
+    
 </script>   
 

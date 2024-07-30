@@ -1,0 +1,140 @@
+{% extends "layouts/supervisorbase.html" %}
+
+{% block title %} Supervisor Dash TaskView {% endblock %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+   <!-- [ Main Content ] start -->
+    <div class="pcoded-main-container">
+        <div class="pcoded-wrapper">
+
+            <div class="pcoded-content">
+                <div class="pcoded-inner-content">
+                    <!-- [ breadcrumb ] start -->
+
+                    <!-- [ breadcrumb ] end -->
+                    <div class="main-body">
+                        <div class="page-wrapper">
+
+                            <!-- START of inserting tasks status dashboard -->
+                                <!-- task_detail.html -->
+
+                                <div class="container">
+                                    
+                                    <head>
+                                        <title>{{ directory.name }} Details</title>
+                                    </head>
+                                    <body>
+                                        <div class="container">
+                                            <h1>
+                                                {% for dir in path %}
+                                                    {% if not forloop.last %}
+                                                        <a href="{% url 'recurring_directory_details' dir.id %}">{{ dir.name }}</a> /
+                                                    {% else %}
+                                                        {{ dir.name }}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </h1>
+                                            <p>Task: {{ task.task_name }}</p>
+                                            <p>Created by: {{ directory.created_by.username }}</p>
+                                    
+                                            <h2>Subdirectories</h2>
+                                            <ul>
+                                                {% for subdirectory in subdirectories %}
+                                                    <li><a href="{% url 'recurring_directory_details' subdirectory.id %}">{{ subdirectory.name }}</a></li>
+                                                {% endfor %}
+                                            </ul>
+                                    
+                                            <h2>Create Subdirectory</h2>
+                                            <form method="post" action="{% url 'recurring_directory_details' directory.id %}">
+                                                {% csrf_token %}
+                                                <input type="text" name="subdirectory_name" placeholder="Subdirectory Name" required>
+                                                <button type="submit" name="create_subdirectory">Create Subdirectory</button>
+                                            </form>
+                                    
+                                            <h2>Files</h2>
+                                            <ul>
+                                                {% for file in files %}
+                                                    <li><strong>Description:</strong> {{ file.description }} - <a href="{{ file.url }}">{{ file.basename }}</a> - (uploaded by {{ file.uploaded_by.username }} on {{ file.upload_date }})</li>
+                                                {% endfor %}
+                                            </ul>
+                                    
+                                            <h2>Upload Files</h2>
+                                            <form id="uploadForm" method="post" enctype="multipart/form-data" action="{% url 'recurring_directory_details' directory.id %}">
+                                                {% csrf_token %}
+                                                <div id="file-input-container">
+                                                    <div class="file-input-group">
+                                                        <input type="file" name="files" required multiple>
+                                                        <button type="button" onclick="removeFileInput(this)">Remove</button>
+                                                    </div>
+                                                </div>
+                                                <input type="text" name="description" placeholder="File Description">
+                                                <button type="button" onclick="addFileInput()">Add More Files</button>
+                                                <button type="submit" name="upload_file">Upload Files</button>
+                                            </form>
+                                        </div>
+                                    </body>
+
+                            <!-- END of inserting tasks status dashboard -->
+
+                            <!-- [ Main Content ] start -->
+                            <div class="row">
+                                <!--[ daily sales section ] start-->
+                                <div class="col-md-6 col-xl-4">
+                                    <div class="card daily-sales">
+                                        <div class="card-block">
+                                            <h6 class="mb-4">Hi {{ user.username }} !</h6>
+                                            <h6 class="mb-4">You have </h6>
+                                            <div class="row d-flex align-items-center">
+                                                <div class="col-9">
+                                                    <h3 class="f-w-300 d-flex align-items-center m-b-3"><i
+                                                            class="feather icon-arrow-up text-c-green f-30 m-r-10"></i>
+                                                        {{ numBlogs }}</h3>
+                                                </div>
+
+                                                <div class="col-3 text-right">
+                                                    <p class="m-b-0">Closed Tasks</p>
+                                                </div>
+                                            </div>
+                                            {#                                            pasting additional section#}
+                                            <h6 class="mb-4">Task completed in the Month</h6>
+                                            <div class="row d-flex align-items-center">
+                                                <div class="col-9">
+                                                    <h3 class="f-w-300 d-flex align-items-center m-b-3"><i
+                                                            class="feather icon-arrow-up text-c-green f-30 m-r-10"></i>
+                                                        {{ monthCount }} </h3>
+                                                </div>
+
+                                                <div class="col-3 text-right">
+                                                    <p class="m-b-0">Tasks</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="progress m-t-30" style="height: 7px;">
+                                                <div class="progress-bar progress-c-theme" role="progressbar"
+                                                     style="width: 50%;" aria-valuenow="50" aria-valuemin="0"
+                                                     aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--[ daily sales section ] end-->
+                                <!--[ Monthly  sales section ] starts-->
+                            </div>
+                            <!-- [ Main Content ] end -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- [ Main Content ] end -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

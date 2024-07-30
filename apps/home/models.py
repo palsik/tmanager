@@ -120,6 +120,7 @@ class Task(models.Model):
 
     task_id = models.AutoField(primary_key=True)
     task_name = models.CharField(max_length=100)
+    task_type = models.CharField(max_length=100, null=True)
     description = models.TextField()
     assigned_personnel = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks_assigned', null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
@@ -146,13 +147,6 @@ class SubTask(models.Model):
         return self.subtask_name    
 
     
-class TaskFile(models.Model):
-    task = models.ForeignKey(Task, related_name='files', on_delete=models.CASCADE)
-    file = models.FileField(upload_to='task_files/')
-
-    def __str__(self):
-        return self.file.name
-
 class TaskAssignmentCount(models.Model):
     personnel = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     task_count = models.IntegerField(default=0)
@@ -177,6 +171,27 @@ class TaskCost(models.Model):
 
     def __str__(self):
         return f"{self.description} - {self.amount}"
+
+
+class TaskDirectory(models.Model):
+    name = models.CharField(max_length=255)
+    task = models.ForeignKey('Task', on_delete=models.CASCADE, related_name='directories')
+    parent_directory = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='subdirectories')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+    
+class TaskFile(models.Model):
+    directory = models.ForeignKey(TaskDirectory, on_delete=models.CASCADE, related_name='files', null=True)
+    file = models.FileField(upload_to='task_files/')
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    upload_date = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.file.name
   
   
  
@@ -213,17 +228,7 @@ class RecurringTask(models.Model):
 
     def __str__(self):
         return self.task_name
-    
-class TaskUpdate(models.Model):
-    task = models.ForeignKey(RecurringTask, on_delete=models.CASCADE, related_name='updates')
-    update_date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=RecurringTask.STATUS_CHOICES)
-    remarks = models.TextField(blank=True, null=True)
-    files = models.ManyToManyField(RecurrentFiles, related_name='task_updates', blank=True)
-
-    def __str__(self):
-        return f"Update for {self.task.task_name} on {self.update_date}"
-    
+       
 def task_directory_path(instance, filename):
     client_name = instance.task.client.user.username
     year = instance.task.start_date.year
@@ -250,15 +255,39 @@ class RecurringTaskFile(models.Model):
         self.file.name = os.path.join(task_path, os.path.basename(self.file.name))
         super().save(*args, **kwargs)
 
-class TaskDirectory(models.Model):
-    task = models.ForeignKey(RecurringTask, on_delete=models.CASCADE)
-    client = models.ForeignKey(Profile1, on_delete=models.CASCADE)
-    year = models.IntegerField(null=True, blank=True)
-    month = models.CharField(max_length=20, null=True, blank=True)
-    path = models.CharField(max_length=255)
+class RTaskDirectory(models.Model):
+    task = models.ForeignKey(RecurringTask, on_delete=models.CASCADE, related_name='directories')
+    name = models.CharField(max_length=100)
+    parent_directory = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='subdirectories')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.path
+        return f"{self.name} ({self.task.task_name})"
+    
+
+
+def task_file_path(instance, filename):
+    return f'recurrent_task_files/{instance.directory.task.id}/files/{filename}'
+    
+class RTaskFile(models.Model):
+    directory = models.ForeignKey(RTaskDirectory, related_name='files', on_delete=models.CASCADE)
+    file = models.FileField(upload_to=task_file_path)
+    description = models.TextField(blank=True, null=True)
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    upload_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.file.name
+    
+class RTaskUpdate(models.Model):
+    task = models.ForeignKey(RecurringTask, on_delete=models.CASCADE, related_name='updates')
+    update_text = models.TextField()
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Update on {self.update_date} by {self.updated_by}"
 
   
 class Blog(models.Model):

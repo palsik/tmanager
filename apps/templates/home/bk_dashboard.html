@@ -70,13 +70,20 @@
                                 <!--[ daily sales section ] end-->
                             <body>
                                 <h3>Recurring Tasks Assigned to You</h3>
-                                <ul>
-                                    {% for task in assigned_recurring_tasks %}
-                                        <li>
-                                            <a href="{% url 'personnel_recurring_task_detail' pk=task.pk %}">{{ task.task_name }}</a> - {{ task.status }}
-                                        </li>
-                                    {% endfor %}
-                                </ul>
+                                <body>
+                                    <div class="container">
+                                        <h1>Bookkeeping Dashboard</h1>
+                                        <ul>
+                                            {% for task in assigned_recurring_tasks %}
+                                                <li>
+                                                    <a href="{% url 'personnel_recurring_task_detail' task.id %}">{{ task.task_name }}</a>
+                                                    - Status: {{ task.status }}
+                                                    - Assigned to: {{ task.assigned_personnel.user.username }}
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </body>
                             </body>
 
                                 <!--[ Saved Blogs ] start-->

@@ -31,10 +31,19 @@ urlpatterns = [
     path('client/<str:client_username>/tasks/', views.client_recurring_tasks, name='client_recurring_tasks'),    
     path('create_recurring_task/', views.create_recurring_task, name='create_recurring_task'),  # new recurring task creation view
     path('update_recurring_task/<int:task_id>/', views.update_recurring_task, name='update_recurring_task'),
-    path('recurring_task/<int:task_id>/', views.recurring_task_detail, name='recurring_task_detail'),
+    #path('recurring_task/<int:task_id>/', views.recurring_task_detail, name='recurring_task_detail'),
     path('client_recurring_tasks/<int:client_id>/', views.client_recurring_tasks, name='client_recurring_tasks'),
     path('personnel/<str:personnel_username>/Rtasks/', views.personnel_assigned_Rtasks, name='personnel_assigned_Rtasks'),
-    path('recurring_task/<int:pk>/', views.personnel_recurring_task_detail, name='personnel_recurring_task_detail'),
+    path('recurring_task/<int:task_id>/', views.personnel_recurring_task_detail, name='personnel_recurring_task_detail'),
+    path('supervisor/recurring_task/<int:task_id>/', views.supervisor_recurring_task_detail, name='supervisor_recurring_task_detail'),
+    path('recurring_task/<int:task_id>/create_directory/', views.Rcreate_directory, name='Rcreate_directory'),
+    path('recurring_task/<int:task_id>/upload_file/', views.Rupload_file, name='Rupload_file'),
+    path('recurring_task/<int:task_id>/add_update/', views.Radd_task_update, name='add_task_update'),
+    path('directory/<int:directory_id>/', views.recurring_directory_details, name='recurring_directory_details'),
+    path('directory/<int:directory_id>/create_subdirectory/', views.create_subdirectory, name='create_subdirectory'),
+    path('directory/<int:directory_id>/upload_files/', views.upload_files, name='upload_files'),
+    path('delete_directory/<int:directory_id>/', views.delete_directory, name='delete_directory'),
+    path('delete_file/<int:file_id>/', views.delete_file, name='delete_file'),
     path('blog-section', views.blogSections, name='blogSections'),
 
     # Saving blog Topic for future use
