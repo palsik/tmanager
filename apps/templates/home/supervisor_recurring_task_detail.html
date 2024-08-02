@@ -32,6 +32,17 @@
                                         <p>{{ task.description }}</p>
                                         <p>Status: {{ task.status }}</p>
                                         
+                                        <h2>Update Task Status</h2>
+                                            <form method="post" action="{% url 'supervisor_recurring_task_detail' task.id %}">
+                                                {% csrf_token %}
+                                                <select name="status" required>
+                                                    <option value="assigned" {% if task.status == "assigned" %}selected{% endif %}>Assigned</option>
+                                                    <option value="in_progress" {% if task.status == "in_progress" %}selected{% endif %}>In Progress</option>
+                                                    <option value="approved" {% if task.status == "approved" %}selected{% endif %}>Approved</option>
+                                                </select>
+                                                <button type="submit" name="update_status">Update Status</button>
+                                            </form>
+                                        
                                         <h2>Directories</h2>
                                         <ul>
                                             {% for directory in directories %}
@@ -70,25 +81,8 @@
                                                 </li>
                                             {% endfor %}
                                         </ul>
-                                    
-                                        <!-- Create Directory Form -->
-                                        <h2>Create Directory</h2>
-                                        <form method="POST" action="{% url 'Rcreate_directory' task.id %}">
-                                            {% csrf_token %}
-                                            <input type="text" name="directory_name" placeholder="Directory Name" required>
-                                            <input type="hidden" name="parent_directory_id" id="parent-directory-id">
-                                            <button type="submit">Create</button>
-                                        </form>
-                                    
-                                        <!-- Upload File Form -->
-                                        <h2>Upload File</h2>
-                                        <form method="POST" enctype="multipart/form-data" action="{% url 'Rupload_file' task.id %}">
-                                            {% csrf_token %}
-                                            <input type="file" name="file" required>
-                                            <input type="hidden" name="directory_id" id="upload-directory-id">
-                                            <button type="submit">Upload</button>
-                                        </form>
                                     </body>
+                                    
                                                                             
                                 </div>   
 

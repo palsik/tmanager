@@ -1,6 +1,6 @@
 {% extends "layouts/supervisorbase.html" %}
 
-{% block title %} Supervisor Dash TaskView {% endblock %}
+{% block title %} Task Detail Dash TaskView {% endblock %}
 
 <!-- Specific CSS goes HERE -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -23,82 +23,96 @@
                                 <!-- task_detail.html -->
 
                                 <div class="container">
-    <h1>Task Detail</h1>
-    <h3>{{ task.task_name }}</h3>
-    <p>{{ task.description }}</p>
-    <p>Assigned to: {{ task.assigned_personnel.username }}</p>
-    <p>Status: {{ task.get_status_display }}</p>
-    <p>Remarks: {{ task.remarks }}</p>
-    <p>Approved: {{ task.approved }}</p>
-    <p>Created at: {{ task.created_at }}</p>
-
-    {% if task.file %}
-        <p>Attached File: <a href="{% url 'task_detail' task.task_id %}" download>{{ task.file.name }}</a></p>
-        <form method="post">
-            {% csrf_token %}
-            <button type="submit" name="download_file" class="btn btn-primary">Download File</button>
-        </form>
-    {% endif %}
-
-    {% if user_profile.user_type == 'personnel' %}
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="remarks">Remarks:</label>
-                <textarea id="remarks" name="remarks" class="form-control">{{ task.remarks }}</textarea>
-            </div>
-            <button type="submit" name="update_task" class="btn btn-primary">Update Task</button>
-            <button type="submit" name="mark_completed" class="btn btn-success">Mark as Completed</button>
-        </form>
-    {% elif user_profile.user_type == 'supervisor' %}
-        <form method="post">
-            {% csrf_token %}
-            <button type="submit" name="mark_approved" class="btn btn-success">Mark as Approved</button>
-        </form>
-
-        <h3>Assign Subtasks</h3>
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="subtask_name">Subtask Name:</label>
-                <input type="text" id="subtask_name" name="subtask_name" class="form-control" required>
-            </div>
-            <button type="submit" name="create_subtask" class="btn btn-primary">Create Subtask</button>
-        </form>
-    {% endif %}
-
-    <h3>Directories</h3>
-    <ul>
-        {% for directory in directories %}
-            <li>{{ directory.name }}</li>
-        {% endfor %}
-    </ul>
-
-    <!-- Add forms for creating files and directories -->
-    <h3>Create Directory</h3>
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="directory_name">Directory Name:</label>
-            <input type="text" id="directory_name" name="directory_name" class="form-control" required>
-        </div>
-        <button type="submit" name="create_directory" class="btn btn-primary">Create Directory</button>
-    </form>
-
-    <h3>Upload File</h3>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="file">Choose File:</label>
-            <input type="file" id="file" name="file" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="description">Description:</label>
-            <input type="text" id="description" name="description" class="form-control" required>
-        </div>
-        <button type="submit" name="upload_file" class="btn btn-primary">Upload File</button>
-    </form>
-</div>
+                                    <h1>Task: {{ task.task_name }}</h1>
+                                    <p>Status: {{ task.status }}</p>
+                                    <p>Assigned to: {{ task.assigned_personnel.user.username }}</p>
+                                
+                                    <!-- Status Update Form -->
+                                    {% if user_profile.user_type == 'supervisor' %}
+                                    <h2>Update Task Status</h2>
+                                    <form method="post" action="{% url 'task_detail' task.task_id %}">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="status">Status:</label>
+                                            <select id="status" name="status" class="form-control" required>
+                                                <option value="in_progress" {% if task.status == "in_progress" %}selected{% endif %}>In Progress</option>
+                                                <option value="approved" {% if task.status == "approved" %}selected{% endif %}>Approved</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" name="update_status" class="btn btn-primary">Update Status</button>
+                                    </form>
+                                    {% elif user_profile.user_type == 'personnel' %}
+                                    <h2>Update Task Status</h2>
+                                    <form method="post" action="{% url 'task_detail' task.task_id %}">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="status">Status:</label>
+                                            <select id="status" name="status" class="form-control" required>
+                                                <option value="on_hold" {% if task.status == "on_hold" %}selected{% endif %}>On hold</option>
+                                                <option value="completed" {% if task.status == "completed" %}selected{% endif %}>Completed</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" name="update_status" class="btn btn-primary">Update Status</button>
+                                    </form>
+                                    {% endif %}
+                                
+                                    <h2>Directories</h2>
+                                    <ul>
+                                        {% for directory in directories %}
+                                        <li>
+                                            <a href="{% url 'task_directory_detail' task.task_id directory.id %}">{{ directory.name }}</a>
+                                            <ul>
+                                                {% for subdirectory in directory.subdirectories.all %}
+                                                <li>
+                                                    <a href="{% url 'task_directory_detail' task.task_id subdirectory.id %}">{{ subdirectory.name }}</a>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                            <ul>
+                                                {% for file in directory.files.all %}
+                                                <li><a href="{{ file.file.url }}">{{ file.file.name }}</a></li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                
+                                    <h2>Create Directory</h2>
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="directory_name">Directory Name:</label>
+                                            <input type="text" id="directory_name" name="directory_name" class="form-control" required>
+                                        </div>
+                                        <input type="hidden" name="parent_directory_id" value="">
+                                        <button type="submit" name="create_directory" class="btn btn-primary">Create Directory</button>
+                                    </form>
+                                
+                                    <!-- Costs Section -->
+                                    <h2>Costs</h2>
+                                    <ul>
+                                        {% for cost in costs %}
+                                        <li>{{ cost.description }} - ${{ cost.amount }} (Created by: {{ cost.created_by.username }})</li>
+                                        {% endfor %}
+                                    </ul>
+                                
+                                    <h2>Add Cost</h2>
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="cost_description">Description:</label>
+                                            <input type="text" id="cost_description" name="cost_description" class="form-control" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cost_amount">Amount:</label>
+                                            <input type="number" step="0.01" id="cost_amount" name="cost_amount" class="form-control" required>
+                                        </div>
+                                        <button type="submit" name="add_cost" class="btn btn-primary">Add Cost</button>
+                                    </form>
+                                </div>
+                                
+                                
+                                
 
                                    
 

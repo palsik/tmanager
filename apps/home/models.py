@@ -192,6 +192,15 @@ class TaskFile(models.Model):
 
     def __str__(self):
         return self.file.name
+    
+class TaskUpdate(models.Model):
+    task = models.ForeignKey(Task, related_name='updates', on_delete=models.CASCADE)
+    update_text = models.TextField()
+    updated_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    update_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Update by {self.updated_by} on {self.update_date}"
   
   
  
@@ -229,6 +238,15 @@ class RecurringTask(models.Model):
     def __str__(self):
         return self.task_name
        
+class RTaskCost(models.Model):
+    task = models.ForeignKey(RecurringTask, on_delete=models.CASCADE, related_name='costs')
+    description = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_cost')
+
+    def __str__(self):
+        return f"{self.description} - {self.amount}"
+
 def task_directory_path(instance, filename):
     client_name = instance.task.client.user.username
     year = instance.task.start_date.year

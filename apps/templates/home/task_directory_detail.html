@@ -23,49 +23,54 @@
                                 <!-- task_detail.html -->
 
                                 <div class="container">
-                                    <h1>Directory Detail</h1>
-                                    <h3>{{ directory.name }}</h3>
+                                    <h1>
+                                        {% for dir in path %}
+                                            {% if not forloop.last %}
+                                                <a href="{% url 'task_directory_detail' task.task_id dir.id %}">{{ dir.name }}</a> /
+                                            {% else %}
+                                                {{ dir.name }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </h1>
+                                    <p>Task: {{ task.task_name }}</p>
+                                    <p>Created by: {{ directory.created_by.username }}</p>
                                 
-                                    <h3>Subdirectories</h3>
+                                    <h2>Subdirectories</h2>
                                     <ul>
                                         {% for subdirectory in subdirectories %}
-                                            <li><a href="{% url 'directory_detail' subdirectory.id %}">{{ subdirectory.name }}</a></li>
+                                            <li><a href="{% url 'task_directory_detail' task.task_id subdirectory.id %}">{{ subdirectory.name }}</a></li>
                                         {% endfor %}
                                     </ul>
                                 
-                                    <h3>Files</h3>
+                                    <h2>Create Subdirectory</h2>
+                                    <form method="post" action="{% url 'task_directory_detail' task.task_id directory.id %}">
+                                        {% csrf_token %}
+                                        <input type="text" name="subdirectory_name" placeholder="Subdirectory Name" required>
+                                        <button type="submit" name="create_subdirectory">Create Subdirectory</button>
+                                    </form>
+                                
+                                    <h2>Files</h2>
                                     <ul>
                                         {% for file in files %}
-                                            <li>
-                                                <a href="{{ file.file.url }}" download>{{ file.file.name }}</a> - {{ file.description }} - Uploaded by {{ file.uploaded_by.username }} on {{ file.upload_date }}
-                                            </li>
+                                            <li><strong>Description:</strong> {{ file.description }} - <a href="{{ file.file.url }}">{{ file.file.name }}</a> - (uploaded by {{ file.uploaded_by.username }} on {{ file.upload_date }})</li>
                                         {% endfor %}
                                     </ul>
                                 
-                                    <h3>Create Subdirectory</h3>
-                                    <form method="post">
+                                    <h2>Upload Files</h2>
+                                    <form method="post" enctype="multipart/form-data" action="{% url 'task_directory_detail' task.task_id directory.id %}">
                                         {% csrf_token %}
                                         <div class="form-group">
-                                            <label for="subdirectory_name">Subdirectory Name:</label>
-                                            <input type="text" id="subdirectory_name" name="subdirectory_name" class="form-control" required>
-                                        </div>
-                                        <button type="submit" name="create_subdirectory" class="btn btn-primary">Create Subdirectory</button>
-                                    </form>
-                                
-                                    <h3>Upload File</h3>
-                                    <form method="post" enctype="multipart/form-data">
-                                        {% csrf_token %}
-                                        <div class="form-group">
-                                            <label for="file">Choose File:</label>
-                                            <input type="file" id="file" name="file" class="form-control" required>
+                                            <label for="files">Upload Files:</label>
+                                            <input type="file" id="files" name="files" multiple required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="description">Description:</label>
-                                            <input type="text" id="description" name="description" class="form-control" required>
+                                            <label for="description">File Description:</label>
+                                            <input type="text" id="description" name="description">
                                         </div>
-                                        <button type="submit" name="upload_file" class="btn btn-primary">Upload File</button>
+                                        <button type="submit" name="upload_file">Upload Files</button>
                                     </form>
                                 </div>
+                                
                                 
                                 
                                    

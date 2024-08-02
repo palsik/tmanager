@@ -70,7 +70,7 @@
                                                 {% if tasks_on_hold %}
                                                     {% for task in tasks_on_hold %}
                                                         <li class="list-group-item">
-                                                            <strong><a href="{% url 'client_recurring_tasks' client_username=client.user.username %}">{{ client.user.username }}</a></strong><br>
+                                                            <strong><a href="{% url 'task_detail' task.task_id %}">{{ task.task_name }}</a></strong><br>
                                                             Assigned to: {{ task.assigned_personnel.username }}
                                                         </li>
                                                     {% endfor %}
@@ -113,6 +113,8 @@
                                 
                                     
                                 </div>
+                            
+                                
                                                                
 
                             <!-- END of inserting tasks status dashboard -->

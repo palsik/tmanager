@@ -33,27 +33,36 @@
                                             <p>Status: {{ task.status }}</p>
                                             <p>Assigned to: {{ task.assigned_personnel.user.username }}</p>
                                     
+                                            <h2>Update Task Status</h2>
+                                            <form method="post" action="{% url 'personnel_recurring_task_detail' task.id %}">
+                                                {% csrf_token %}
+                                                <select name="status" required>
+                                                    <option value="pending" {% if task.status == "pending" %}selected{% endif %}>Pending</option>
+                                                    <option value="completed" {% if task.status == "completed" %}selected{% endif %}>Completed</option>
+                                                </select>
+                                                <button type="submit" name="update_status">Update Status</button>
+                                            </form>
+                                    
                                             <h2>Directories</h2>
-                                                     <!-- Inside the directories loop -->
-                                                     <ul>
-                                                        {% for directory in directories %}
-                                                            <li>
-                                                                <a href="{% url 'recurring_directory_details' directory.id %}">{{ directory.name }}</a>
-                                                                <ul>
-                                                                    {% for subdirectory in directory.subdirectories.all %}
-                                                                        <li>
-                                                                            <a href="{% url 'recurring_directory_details' subdirectory.id %}">{{ subdirectory.name }}</a>
-                                                                        </li>
-                                                                    {% endfor %}
-                                                                </ul>
-                                                                <ul>
-                                                                    {% for file in directory.files.all %}
-                                                                        <li><a href="{{ file.file.url }}">{{ file.file.name }}</a></li>
-                                                                    {% endfor %}
-                                                                </ul>
-                                                            </li>
-                                                        {% endfor %}
-                                                    </ul>
+                                            <ul>
+                                                {% for directory in directories %}
+                                                    <li>
+                                                        <a href="{% url 'recurring_directory_details' directory.id %}">{{ directory.name }}</a>
+                                                        <ul>
+                                                            {% for subdirectory in directory.subdirectories.all %}
+                                                                <li>
+                                                                    <a href="{% url 'recurring_directory_details' subdirectory.id %}">{{ subdirectory.name }}</a>
+                                                                </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                        <ul>
+                                                            {% for file in directory.files.all %}
+                                                                <li><a href="{{ file.file.url }}">{{ file.file.name }}</a></li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
                                     
                                             <h2>Create Directory</h2>
                                             <form method="post">
@@ -82,7 +91,8 @@
                                                 {% endfor %}
                                             </ul>
                                         </div>
-                                    </body>                                 
+                                    </body>
+                                                                   
                                                                             
                                 </div>   
 

@@ -28,6 +28,7 @@ import logging
 from datetime import date
 from datetime import date, datetime
 from django.http import HttpResponseBadRequest
+from django.core.mail import send_mail
 
 logger = logging.getLogger(__name__)
 
@@ -463,6 +464,8 @@ def supervisor_dashboard(request):
     tasks_pending = Task.objects.filter(status='pending')
     tasks_in_progress = Task.objects.filter(status='in_progress')
     tasks_completed = Task.objects.filter(status='completed')
+    tasks_approved = Task.objects.filter(status='approved')
+    tasks_on_hold = Task.objects.filter(status='on_hold')
 
     # Get clients with recurring tasks
     clients_with_recurring_tasks = Profile1.objects.filter(recurring_tasks__isnull=False).distinct()
@@ -471,35 +474,37 @@ def supervisor_dashboard(request):
         "tasks_pending": tasks_pending,
         "tasks_in_progress": tasks_in_progress,
         "tasks_completed": tasks_completed,
+        "tasks_approved": tasks_approved,
+        "tasks_on_hold": tasks_on_hold,
         "clients_with_recurring_tasks": clients_with_recurring_tasks,
     })
 
 @login_required
 def task_detail(request, task_id):
+    print('The mail task detail has been reached')
     task = get_object_or_404(Task, task_id=task_id)
     user_profile = Profile1.objects.get(user=request.user)
     directories = TaskDirectory.objects.filter(task=task)
     files = TaskFile.objects.filter(directory__in=directories)
+    costs = TaskCost.objects.filter(task=task)
 
     if request.method == 'POST':
-        if 'update_task' in request.POST:
-            task.remarks = request.POST.get('remarks', '')
+        if 'update_status' in request.POST:
+            new_status = request.POST.get('status')
+            print('condition for Post update status met')
+            if user_profile.user_type == 'supervisor':
+                print('condition for supervisor status met')
+                if new_status in ['in_progress', 'approved']:
+                    task.status = new_status
+                    send_status_email_to_personnel(task, task.assigned_personnel.user.email)
+            elif user_profile.user_type == 'personnel':
+                print('condition for personnel status met')
+                if new_status in ['on_hold', 'completed']:
+                    task.status = new_status
+                    print(f'The task is: {task.task_name}, The mail is: paulikmwendan@gmail.com')
+                    send_status_email_to_supervisor(task, 'paulikmwendan@gmail.com')
             task.save()
             return redirect('task_detail', task_id=task_id)
-        elif 'mark_completed' in request.POST:
-            task.status = 'completed'
-            task.save()
-            return redirect('task_detail', task_id=task_id)
-        elif 'mark_approved' in request.POST and user_profile.user_type == 'supervisor':
-            task.approved = True
-            task.save()
-            return redirect('task_detail', task_id=task_id)
-        elif 'download_file' in request.POST:
-            file_path = task.file.path
-            with open(file_path, 'rb') as file:
-                response = HttpResponse(file.read(), content_type='application/octet-stream')
-                response['Content-Disposition'] = f'attachment; filename={task.file.name}'
-                return response
         elif 'create_directory' in request.POST:
             directory_name = request.POST.get('directory_name')
             if directory_name:
@@ -509,16 +514,26 @@ def task_detail(request, task_id):
                     created_by=request.user
                 )
                 return redirect('task_detail', task_id=task_id)
-        elif 'upload_files' in request.POST:
+        elif 'upload_file' in request.POST:
             description = request.POST.get('file_description', '')
-            if 'files' in request.FILES:
-                for uploaded_file in request.FILES.getlist('files'):
-                    TaskFile.objects.create(
-                        directory=TaskDirectory.objects.get(task=task),  # Assuming files are uploaded to the main task directory
-                        file=uploaded_file,
-                        uploaded_by=request.user,
-                        description=description
-                    )
+            if 'file' in request.FILES:
+                TaskFile.objects.create(
+                    directory=TaskDirectory.objects.get(id=request.POST.get('directory_id')),
+                    file=request.FILES['file'],
+                    uploaded_by=request.user,
+                    description=description
+                )
+                return redirect('task_detail', task_id=task_id)
+        elif 'add_cost' in request.POST:
+            description = request.POST.get('cost_description')
+            amount = request.POST.get('cost_amount')
+            if description and amount:
+                TaskCost.objects.create(
+                    task=task,
+                    description=description,
+                    amount=amount,
+                    created_by=request.user
+                )
                 return redirect('task_detail', task_id=task_id)
 
     return render(request, 'home/task_detail.html', {
@@ -526,8 +541,75 @@ def task_detail(request, task_id):
         'user_profile': user_profile,
         'directories': directories,
         'files': files,
-        'subtasks': task.subtasks.all()  # Adjust according to your actual subtask relationship
+        'costs': costs,
     })
+
+
+def send_status_email_to_personnel(task, recipient_email):
+    send_mail(
+        'Task Status Updated',
+        f'The status of task "{task.task_name}" has been updated to "{task.status}".',
+        'paulikmwendan@gmail.com',
+        [recipient_email],
+        fail_silently=False,
+    )
+
+def send_status_email_to_supervisor(task, recipient_email):
+    send_mail(
+        'Task Status Updated',
+        f'The status of task "{task.task_name}" has been updated to "{task.status}".',
+        'paulikmwendan@gmail.com',
+        [recipient_email],
+        fail_silently=False,
+    )
+
+@login_required
+def task_directory_detail(request, task_id, directory_id):
+    task = get_object_or_404(Task, task_id=task_id)
+    directory = get_object_or_404(TaskDirectory, id=directory_id, task=task)
+
+    subdirectories = TaskDirectory.objects.filter(parent_directory=directory)
+    files = TaskFile.objects.filter(directory=directory)
+
+    if request.method == 'POST':
+        if 'create_subdirectory' in request.POST:
+            subdirectory_name = request.POST.get('subdirectory_name')
+            if subdirectory_name:
+                TaskDirectory.objects.create(
+                    name=subdirectory_name,
+                    task=task,
+                    parent_directory=directory,
+                    created_by=request.user
+                )
+                return redirect('task_directory_detail', task_id=task_id, directory_id=directory_id)
+        elif 'upload_file' in request.POST:
+            if 'files' in request.FILES:
+                uploaded_files = request.FILES.getlist('files')
+                description = request.POST.get('description', '')
+                for uploaded_file in uploaded_files:
+                    TaskFile.objects.create(
+                        directory=directory,
+                        file=uploaded_file,
+                        uploaded_by=request.user,
+                        description=description
+                    )
+                return redirect('task_directory_detail', task_id=task_id, directory_id=directory_id)
+
+    return render(request, 'home/task_directory_detail.html', {
+        'task': task,
+        'directory': directory,
+        'subdirectories': subdirectories,
+        'files': files,
+        'path': get_directory_path(directory),
+    })
+
+def get_directory_path(directory):
+    path = []
+    current_directory = directory
+    while current_directory is not None:
+        path.insert(0, current_directory)
+        current_directory = current_directory.parent_directory
+    return path
 
 
 @login_required
@@ -615,36 +697,81 @@ def create_recurring_task(request):
             return JsonResponse({'error': str(e)}, status=500)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
+    
+@login_required
+def recurring_task_dashboard(request):
+    # Fetch recurrent tasks based on their status
+    tasks_pending = RecurringTask.objects.filter(status='pending')
+    tasks_in_progress = RecurringTask.objects.filter(status='in_progress')
+    tasks_on_hold = RecurringTask.objects.filter(status='on_hold')
+    tasks_completed = RecurringTask.objects.filter(status='completed')
 
+    return render(request, 'recurring_task_dashboard.html', {
+        'tasks_pending': tasks_pending,
+        'tasks_in_progress': tasks_in_progress,
+        'tasks_on_hold': tasks_on_hold,
+        'tasks_completed': tasks_completed
+    })
+    # Fetch tasks based on their status
+    tasks_pending = RecurringTask.objects.filter(status='pending')
+    tasks_in_progress = RecurringTask.objects.filter(status='in_progress')
+    tasks_on_hold = RecurringTask.objects.filter(status='on_hold')
+    tasks_completed = RecurringTask.objects.filter(status='completed')
+
+    return render(request, 'supervisor.html', {
+        'tasks_pending': tasks_pending,
+        'tasks_in_progress': tasks_in_progress,
+        'tasks_on_hold': tasks_on_hold,
+        'tasks_completed': tasks_completed
+    })
+
+@login_required
 def update_recurring_task(request, task_id):
     task = get_object_or_404(RecurringTask, id=task_id)
+    user_profile = Profile1.objects.get(user=request.user)
+    
     if request.method == 'POST':
-        status = request.POST.get('status')
-        remarks = request.POST.get('remarks')
+        if 'update_task' in request.POST:
+            status = request.POST.get('status')
+            remarks = request.POST.get('remarks')
 
-        task_update = RTaskUpdate.objects.create(
-            task=task,
-            status=status,
-            remarks=remarks
-        )
+            task_update = RTaskUpdate.objects.create(
+                task=task,
+                status=status,
+                remarks=remarks
+            )
 
-        if request.FILES.getlist('files'):
-            for file in request.FILES.getlist('files'):
-                task_file = RecurrentFiles.objects.create(file=file)
-                task_update.files.add(task_file)
-        task_update.save()
+            if request.FILES.getlist('files'):
+                for file in request.FILES.getlist('files'):
+                    task_file = RecurrentFiles.objects.create(file=file)
+                    task_update.files.add(task_file)
+            task_update.save()
 
-        return JsonResponse({'message': 'Task updated successfully'})
+            return JsonResponse({'message': 'Task updated successfully'})
+
+        elif 'add_cost' in request.POST:
+            description = request.POST.get('cost_description')
+            amount = request.POST.get('cost_amount')
+
+            if description and amount:
+                RTaskCost.objects.create(
+                    task=task,
+                    description=description,
+                    amount=amount,
+                    created_by=request.user
+                )
+                return JsonResponse({'message': 'Cost added successfully'})
+
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-def recurring_task_detail(request, task_id):
-    task = get_object_or_404(RecurringTask, id=task_id)
-    months = ["January", "February", "March", "April", "May", "June", 
-              "July", "August", "September", "October", "November", "December"]
-    return render(request, 'home/recurrent_task_detail.html', {
-        'task': task,
-        'months': months,
-    })
+# def recurring_task_detail(request, task_id):
+#     task = get_object_or_404(RecurringTask, id=task_id)
+#     months = ["January", "February", "March", "April", "May", "June", 
+#               "July", "August", "September", "October", "November", "December"]
+#     return render(request, 'home/recurrent_task_detail.html', {
+#         'task': task,
+#         'months': months,
+#     })
 
 def client_recurring_tasks(request, client_username):
     client = get_object_or_404(Profile1, user__username=client_username)
@@ -656,26 +783,22 @@ def client_recurring_tasks(request, client_username):
 
 @login_required
 def recurring_task_detail(request, task_id):
-    task = get_object_or_404(RecurringTask, id=task_id)
-    
-    # Logic to generate six years back
-    current_year = date.today().year
-    six_years_back = list(range(current_year, current_year - 6, -1))
-    
-    # Ensure directory structure is created
-    for year in six_years_back:
-        for month in range(1, 13):
-            month_name = date(1900, month, 1).strftime('%B')
-            task_path = os.path.join(settings.MEDIA_ROOT, 'recurrent_task_files', str(task.client.id), str(year), month_name, task.task_name)
-            os.makedirs(task_path, exist_ok=True)
-    
-    # List of month names
-    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    task = get_object_or_404(RecurringTask, pk=task_id)
+    user_profile = Profile1.objects.get(user=request.user)
+    files = task.files.all()
 
-    return render(request, 'home/recurrent_task_detail.html', {
+    if request.method == 'POST':
+        if 'update_status' in request.POST:
+            new_status = request.POST.get('status')
+            if new_status in ['pending', 'completed']:
+                task.status = new_status
+                task.save()
+                return redirect('recurring_task_detail', task_id=task_id)
+
+    return render(request, 'home/recurring_task_detail.html', {
         'task': task,
-        'six_years_back': six_years_back,
-        'months': months,
+        'user_profile': user_profile,
+        'files': files,
     })
 
 def personnel_assigned_Rtasks(request, personnel_username):
@@ -703,7 +826,19 @@ def personnel_recurring_task_detail(request, task_id):
     directories = RTaskDirectory.objects.filter(task=task, parent_directory__isnull=True)
 
     if request.method == 'POST':
-        if 'create_directory' in request.POST:
+        if 'update_status' in request.POST:
+            new_status = request.POST.get('status')
+            print('condition for Post update status met')
+            user_profile = Profile1.objects.get(user=request.user)
+            if user_profile.user_type == 'personnel':
+                print('condition for personnel status met')
+                if new_status in ['pending', 'completed']:
+                    task.status = new_status
+                    task.save()
+                    print(f'The task is: {task.task_name}, The mail is: {task.client.user.email}')
+                    send_status_email_to_supervisor1(task, task.client.user.email)
+            return redirect('personnel_recurring_task_detail', task_id=task_id)
+        elif 'create_directory' in request.POST:
             return Rcreate_directory(request, task_id)
         elif 'upload_file' in request.POST:
             directory_id = request.POST.get('directory_id')
@@ -715,6 +850,16 @@ def personnel_recurring_task_detail(request, task_id):
         'updates': updates,
         'directories': directories,
     })
+
+def send_status_email_to_supervisor1(task, recipient_email):
+    send_mail(
+        'Task Status Updated',
+        f'The status of task "{task.task_name}" has been updated to "{task.status}".',
+        'paulikmwendan@gmail.com',
+        [recipient_email],
+        fail_silently=False,
+    )
+
 @login_required
 def supervisor_recurring_task_detail(request, task_id):
     print('supervisor_recurring_task_detail has been reached')
@@ -723,7 +868,19 @@ def supervisor_recurring_task_detail(request, task_id):
     directories = RTaskDirectory.objects.filter(task=task, parent_directory__isnull=True)
 
     if request.method == 'POST':
-        if 'create_directory' in request.POST:
+        if 'update_status' in request.POST:
+            new_status = request.POST.get('status')
+            print('condition for Post update status met')
+            user_profile = Profile1.objects.get(user=request.user)
+            if user_profile.user_type == 'supervisor':
+                print('condition for supervisor status met')
+                if new_status in ['assigned', 'in_progress', 'approved']:
+                    task.status = new_status
+                    task.save()
+                    print(f'The task is: {task.task_name}, The mail is: {task.assigned_personnel.user.email}')
+                    send_status_email_to_personnel1(task, task.assigned_personnel.user.email)
+            return redirect('supervisor_recurring_task_detail', task_id=task_id)
+        elif 'create_directory' in request.POST:
             return Rcreate_directory(request, task_id)
         elif 'upload_file' in request.POST:
             directory_id = request.POST.get('directory_id')
@@ -736,6 +893,16 @@ def supervisor_recurring_task_detail(request, task_id):
         'updates': updates,
         'directories': directories,
     })
+
+def send_status_email_to_personnel1(task, recipient_email):
+    send_mail(
+        'Task Status Updated',
+        f'The status of task "{task.task_name}" has been updated to "{task.status}".',
+        'paulikmwendan@gmail.com',
+        [recipient_email],
+        fail_silently=False,
+    )
+
 
 def create_directory_in_media(path):
     """
