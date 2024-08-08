@@ -501,8 +501,8 @@ def task_detail(request, task_id):
                 print('condition for personnel status met')
                 if new_status in ['on_hold', 'completed']:
                     task.status = new_status
-                    print(f'The task is: {task.task_name}, The mail is: paulikmwendan@gmail.com')
-                    send_status_email_to_supervisor(task, 'paulikmwendan@gmail.com')
+                    print(f'The task is: {task.task_name}, The mail is: office@nelkins.com')
+                    send_status_email_to_supervisor(task, 'office@nelkins.com')
             task.save()
             return redirect('task_detail', task_id=task_id)
         elif 'create_directory' in request.POST:
@@ -558,7 +558,7 @@ def send_status_email_to_supervisor(task, recipient_email):
     send_mail(
         'Task Status Updated',
         f'The status of task "{task.task_name}" has been updated to "{task.status}".',
-        'paulikmwendan@gmail.com',
+        'office@nelkins.com',
         [recipient_email],
         fail_silently=False,
     )
@@ -855,7 +855,7 @@ def send_status_email_to_supervisor1(task, recipient_email):
     send_mail(
         'Task Status Updated',
         f'The status of task "{task.task_name}" has been updated to "{task.status}".',
-        'paulikmwendan@gmail.com',
+        'office@nelkins.com',
         [recipient_email],
         fail_silently=False,
     )

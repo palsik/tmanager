@@ -80,6 +80,26 @@
                                                     </ul>
                                                 </li>
                                             {% endfor %}
+
+                                            <h2>Create Directory</h2>
+                                            <form method="post">
+                                                {% csrf_token %}
+                                                <input type="text" name="directory_name" placeholder="Directory Name" required>
+                                                <input type="hidden" name="parent_directory_id" value="">
+                                                <button type="submit" name="create_directory">Create Directory</button>
+                                            </form>
+                                    
+                                            <h2>Upload File</h2>
+                                            <form method="post" enctype="multipart/form-data">
+                                                {% csrf_token %}
+                                                <select name="directory_id" required>
+                                                    {% for directory in directories %}
+                                                        <option value="{{ directory.id }}">{{ directory.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <input type="file" name="file" required>
+                                                <button type="submit" name="upload_file">Upload File</button>
+                                            </form>
                                         </ul>
                                     </body>
                                     
