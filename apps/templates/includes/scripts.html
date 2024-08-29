@@ -376,32 +376,90 @@ document.addEventListener('DOMContentLoaded', function() {
 ///Scripts serving the loading of page with task details
 
 //start Running scripts to load Auditting views for tasks assigned to views
-$(document).ready(function() {
-    let userType = $('body').data('user-type');
-
-    function fetchTasks(userType) {
-        $.ajax({
-            url: '/fetch_tasks_by_type/',
-            data: {
-                'user_type': userType
-            },
-            success: function(data) {
-                let taskList = $('#task-list');
-                taskList.empty();
-                if (data.tasks.length > 0) {
-                    data.tasks.forEach(function(task) {
-                        taskList.append(`<li><a href="/task/${task.task_id}/">${task.task_name}</a></li>`);
-                    });
-                } else {
-                    taskList.append('<li>No tasks assigned to you.</li>');
-                }
-            }
-        });
-    }
-
-    fetchTasks(userType);
+document.addEventListener("DOMContentLoaded", function() {
+    fetchTaskStatus();
 });
- //end Running scripts to load  views for tasks assigned to views  
+
+function fetchTaskStatus() {
+    fetch('/fetch_tasks_by_type/')
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            }
+            throw new Error('Network response was not ok.');
+        })
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Update task sections
+            document.getElementById('tasks-pending-section').innerHTML = doc.getElementById('tasks-pending-section').innerHTML;
+            document.getElementById('tasks-in-progress-section').innerHTML = doc.getElementById('tasks-in-progress-section').innerHTML;
+            document.getElementById('tasks-on-hold-section').innerHTML = doc.getElementById('tasks-on-hold-section').innerHTML;
+            document.getElementById('tasks-completed-section').innerHTML = doc.getElementById('tasks-completed-section').innerHTML;
+            document.getElementById('tasks-approved-section').innerHTML = doc.getElementById('tasks-approved-section').innerHTML;
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
+
+// And here for the Recurrent function in Auditing DashBoard
+
+// Start Categorisation for Client Tasks section in the Auditting
+document.addEventListener("DOMContentLoaded", function() {
+    fetchTaskStatus3();
+});
+
+function fetchTaskStatus3() {
+    fetch('/auditing_dashboard/')
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            }
+            throw new Error('Network response was not ok.');
+        })
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Update single task sections
+            updateTaskSection('stasks-pending-section', doc.getElementById('stasks-pending-section').innerHTML);
+            updateTaskSection('stasks-in-progress-section', doc.getElementById('stasks-in-progress-section').innerHTML);
+            updateTaskSection('stasks-on-hold-section', doc.getElementById('stasks-on-hold-section').innerHTML);
+            updateTaskSection('stasks-completed-section', doc.getElementById('stasks-completed-section').innerHTML);
+            updateTaskSection('stasks-approved-section', doc.getElementById('stasks-approved-section').innerHTML);
+
+            // Update recurring task sections
+            updateTaskSection('rtasks-pending-section', doc.getElementById('rtasks-pending-section').innerHTML);
+            updateTaskSection('rtasks-in-progress-section', doc.getElementById('rtasks-in-progress-section').innerHTML);
+            updateTaskSection('rtasks-on-hold-section', doc.getElementById('rtasks-on-hold-section').innerHTML);
+            updateTaskSection('rtasks-completed-section', doc.getElementById('rtasks-completed-section').innerHTML);
+            updateTaskSection('rtasks-approved-section', doc.getElementById('rtasks-approved-section').innerHTML);
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
+}
+
+function updateTaskSection(sectionId, content) {
+    const section = document.getElementById(sectionId);
+    section.innerHTML = content; // Update the section with new content
+}
+
+function updateTaskSection(sectionId, doc) {
+    document.getElementById(sectionId).innerHTML = doc.getElementById(sectionId).innerHTML;
+}
+
+
+function updateTaskSection(sectionId, doc) {
+    const sectionElement = document.getElementById(sectionId);
+    if (sectionElement) {
+        sectionElement.innerHTML = doc.getElementById(sectionId).innerHTML;
+    }
+}
+
+// End Categorisation for Client Recurrent section in the Supervisor
  
  //Start of fetch client script button
  $(document).ready(function() {

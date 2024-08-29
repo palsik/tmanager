@@ -20,15 +20,9 @@
                         <div class="page-wrapper">
                             <!-- [ Main Content ] start -->
                             <div class="row">
-                                <body data-user-type="Auditting">
-                                    <div class="container">
-                                        <h1>Auditting Dashboard</h1>
-                                        <h3>Tasks Assigned to You</h3>
-                                        <ul id="task-list"></ul>
-                                    </div>
-                                   
-                                </body>
-                                <!--[ daily sales section ] start-->
+                                <div class="container">
+                                    <h1>Auditing Dashboard</h1>
+                                       <!--[ daily sales section ] start-->
                                 <div class="col-md-6 col-xl-4">
                                     <div class="card daily-sales">
                                         <div class="card-block">
@@ -67,25 +61,189 @@
                                     </div>
                                 </div>
                                 <!--[ daily sales section ] end-->
-                                <body>
-                                    <h3>Recurring Tasks Assigned to You</h3>
-                                    <body>
-                                        <div class="container">
-                                            <h1>Recurring Tasks</h1>
-                                            <ul>
-                                                {% for task in assigned_recurring_tasks %}
-                                                    <li>
-                                                        <a href="{% url 'personnel_recurring_task_detail' task.id %}">{{ task.task_name }}</a>
-                                                        - Status: {{ task.status }}
-                                                        - Assigned to: {{ task.assigned_personnel.user.username }}
-                                                    </li>
-                                                {% endfor %}
+                                <h3 class="mt-5 text-center">Single Tasks Assigned to You</h3>
+    
+                                    <div class="row mt-4">
+                                        <div id="stasks-pending-section" class="col-md-3">
+                                            <h5>Pending Tasks</h5>
+                                            <ul class="list-group">
+                                                {% if tasks_pending %}
+                                                    {% for task in tasks_pending %}
+                                                        <li class="list-group-item">
+                                                            <strong><a href="{% url 'task_detail' task.id %}">{{ task.task_name }}</a></strong><br>
+                                                            Assigned to: {{ task.assigned_personnel.username }}
+                                                        </li>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <li class="list-group-item">No pending tasks assigned to you.</li>
+                                                {% endif %}
                                             </ul>
                                         </div>
-                                    </body>
+                                    
+                                        <div id="stasks-in-progress-section" class="col-md-3">
+                                            <h5>Tasks In Progress</h5>
+                                            <ul class="list-group">
+                                                {% if tasks_in_progress %}
+                                                    {% for task in tasks_in_progress %}
+                                                        <li class="list-group-item">
+                                                            <strong><a href="{% url 'task_detail' task.id %}">{{ task.task_name }}</a></strong><br>
+                                                            Assigned to: {{ task.assigned_personnel.username }}
+                                                        </li>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <li class="list-group-item">No tasks in progress assigned to you.</li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    
+                                        <div id="stasks-on-hold-section" class="col-md-3">
+                                            <h5>Tasks On Hold</h5>
+                                            <ul class="list-group">
+                                                {% if tasks_on_hold %}
+                                                    {% for task in tasks_on_hold %}
+                                                        <li class="list-group-item">
+                                                            <strong><a href="{% url 'task_detail' task.id %}">{{ task.task_name }}</a></strong><br>
+                                                            Assigned to: {{ task.assigned_personnel.username }}
+                                                        </li>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <li class="list-group-item">No tasks on hold assigned to you.</li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    
+                                        <div id="stasks-completed-section" class="col-md-3">
+                                            <h5>Completed Tasks</h5>
+                                            <ul class="list-group">
+                                                {% if tasks_completed %}
+                                                    {% for task in tasks_completed %}
+                                                        <li class="list-group-item">
+                                                            <strong><a href="{% url 'task_detail' task.id %}">{{ task.task_name }}</a></strong><br>
+                                                            Assigned to: {{ task.assigned_personnel.username }}
+                                                        </li>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <li class="list-group-item">No completed tasks assigned to you.</li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    
+                                        <div id="stasks-approved-section" class="col-md-3">
+                                            <h5>Approved Tasks</h5>
+                                            <ul class="list-group">
+                                                {% if tasks_approved %}
+                                                    {% for task in tasks_approved %}
+                                                        <li class="list-group-item">
+                                                            <strong><a href="{% url 'task_detail' task.id %}">{{ task.task_name }}</a></strong><br>
+                                                            Assigned to: {{ task.assigned_personnel.username }}
+                                                        </li>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <li class="list-group-item">No approved tasks assigned to you.</li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    </div>
+    
+    </div>
+
+                             
+                                <body>
+                                    <div class="container">
+                                     <h3 class="mt-5 text-center">Recurring Tasks Assigned to You</h3>
+                                        
+                                     <div class="row mt-4">
+                                        <!-- Pending Recurring Tasks Section -->
+                                        <div class="col-md-4" id="rtasks-pending-section">
+                                            <h5>Pending Tasks</h5>
+                                            <ul class="list-group">
+                                                {% if tasks_pending_recurring %}
+                                                    {% for task in tasks_pending_recurring %}
+                                                        <li class="list-group-item">
+                                                            <a href="{% url 'personnel_recurring_task_detail' task.id %}">{{ task.task_name }}</a>
+                                                            - Assigned to: {{ task.assigned_personnel.user.username }}
+                                                        </li>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <li class="list-group-item">No pending tasks assigned to you.</li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    
+                                        <!-- In Progress Recurring Tasks Section -->
+                                        <div class="col-md-4" id="rtasks-in-progress-section">
+                                            <h5>In Progress Tasks</h5>
+                                            <ul class="list-group">
+                                                {% if tasks_in_progress_recurring %}
+                                                    {% for task in tasks_in_progress_recurring %}
+                                                        <li class="list-group-item">
+                                                            <a href="{% url 'personnel_recurring_task_detail' task.id %}">{{ task.task_name }}</a>
+                                                            - Assigned to: {{ task.assigned_personnel.user.username }}
+                                                        </li>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <li class="list-group-item">No in-progress tasks assigned to you.</li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    
+                                        <!-- On Hold Recurring Tasks Section -->
+                                        <div class="col-md-4" id="rtasks-on-hold-section">
+                                            <h5>Tasks On Hold</h5>
+                                            <ul class="list-group">
+                                                {% if tasks_on_hold_recurring %}
+                                                    {% for task in tasks_on_hold_recurring %}
+                                                        <li class="list-group-item">
+                                                            <a href="{% url 'personnel_recurring_task_detail' task.id %}">{{ task.task_name }}</a>
+                                                            - Assigned to: {{ task.assigned_personnel.user.username }}
+                                                        </li>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <li class="list-group-item">No hold tasks assigned to you.</li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    
+                                        <!-- Completed Recurring Tasks Section -->
+                                        <div class="col-md-4" id="rtasks-completed-section">
+                                            <h5>Completed Tasks</h5>
+                                            <ul class="list-group">
+                                                {% if tasks_completed_recurring %}
+                                                    {% for task in tasks_completed_recurring %}
+                                                        <li class="list-group-item">
+                                                            <a href="{% url 'personnel_recurring_task_detail' task.id %}">{{ task.task_name }}</a>
+                                                            - Assigned to: {{ task.assigned_personnel.user.username }}
+                                                        </li>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <li class="list-group-item">No completed tasks assigned to you.</li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    
+                                        <!-- Approved Recurring Tasks Section -->
+                                        <div class="col-md-4" id="rtasks-approved-section">
+                                            <h5>Approved Tasks</h5>
+                                            <ul class="list-group">
+                                                {% if tasks_approved_recurring %}
+                                                    {% for task in tasks_approved_recurring %}
+                                                        <li class="list-group-item">
+                                                            <a href="{% url 'personnel_recurring_task_detail' task.id %}">{{ task.task_name }}</a>
+                                                            - Assigned to: {{ task.assigned_personnel.user.username }}
+                                                        </li>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <li class="list-group-item">No approved tasks assigned to you.</li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    </div>
+                                    
                                 </body>
                                             
-->
+
                                
 
                             </div>

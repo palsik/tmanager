@@ -423,6 +423,10 @@ def dashboard_view(request):
     else:
         return redirect('home')
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Task, RecurringTask, Profile1
+
 @login_required
 def auditing_dashboard(request):
     user = request.user
@@ -430,16 +434,29 @@ def auditing_dashboard(request):
 
     try:
         personnel_profile = Profile1.objects.get(user=user)
-        assigned_recurring_tasks = RecurringTask.objects.filter(assigned_personnel=personnel_profile)
-        print(f"Assigned recurring tasks for {user.username}: {assigned_recurring_tasks}")
+        recurring_tasks = RecurringTask.objects.filter(assigned_personnel=personnel_profile)
+        print(f"Assigned recurring tasks for {user.username}: {recurring_tasks}")
+
+        # Categorize recurring tasks by status
+        tasks_pending = recurring_tasks.filter(status='pending')
+        tasks_in_progress = recurring_tasks.filter(status='in_progress')
+        tasks_on_hold = recurring_tasks.filter(status='on_hold')
+        tasks_completed = recurring_tasks.filter(status='completed')
+        tasks_approved = recurring_tasks.filter(status='approved')
+
     except Profile1.DoesNotExist:
-        assigned_recurring_tasks = None
+        tasks_pending = tasks_in_progress = tasks_on_hold = tasks_completed = tasks_approved = []
         print(f"No profile found for username: {user.username}")
 
     return render(request, "home/adt_dashboard.html", {
         "user_tasks": tasks,
-        "assigned_recurring_tasks": assigned_recurring_tasks,
+        "tasks_pending": tasks_pending,
+        "tasks_in_progress": tasks_in_progress,
+        "tasks_on_hold": tasks_on_hold,
+        "tasks_completed": tasks_completed,
+        "tasks_approved": tasks_approved,
     })
+
 
 @login_required
 def bookkeeping_dashboard(request):
@@ -461,6 +478,7 @@ def bookkeeping_dashboard(request):
 
 @login_required
 def supervisor_dashboard(request):
+    # Categorize regular tasks by status
     tasks_pending = Task.objects.filter(status='pending')
     tasks_in_progress = Task.objects.filter(status='in_progress')
     tasks_completed = Task.objects.filter(status='completed')
@@ -470,6 +488,13 @@ def supervisor_dashboard(request):
     # Get clients with recurring tasks
     clients_with_recurring_tasks = Profile1.objects.filter(recurring_tasks__isnull=False).distinct()
 
+    # Categorize recurring tasks by status
+    recurring_tasks_pending = RecurringTask.objects.filter(status='pending')
+    recurring_tasks_in_progress = RecurringTask.objects.filter(status='in_progress')
+    recurring_tasks_completed = RecurringTask.objects.filter(status='completed')
+    recurring_tasks_on_hold = RecurringTask.objects.filter(status='on_hold')
+    recurring_tasks_approved = RecurringTask.objects.filter(status='approved')
+    recurring_tasks_assigned = RecurringTask.objects.filter(status='assigned')
     return render(request, "home/supervisor.html", {
         "tasks_pending": tasks_pending,
         "tasks_in_progress": tasks_in_progress,
@@ -477,7 +502,13 @@ def supervisor_dashboard(request):
         "tasks_approved": tasks_approved,
         "tasks_on_hold": tasks_on_hold,
         "clients_with_recurring_tasks": clients_with_recurring_tasks,
+        "recurring_tasks_pending": recurring_tasks_pending,
+        "recurring_tasks_in_progress": recurring_tasks_in_progress,
+        "recurring_tasks_completed": recurring_tasks_completed,
+        "recurring_tasks_on_hold": recurring_tasks_on_hold,
+        "recurring_tasks_approved": recurring_tasks_approved,
     })
+
 
 @login_required
 def task_detail(request, task_id):
@@ -496,7 +527,7 @@ def task_detail(request, task_id):
                 print('condition for supervisor status met')
                 if new_status in ['in_progress', 'approved']:
                     task.status = new_status
-                    send_status_email_to_personnel(task, task.assigned_personnel.user.email)
+                    send_status_email_to_personnel(task, task.assigned_personnel.email)
             elif user_profile.user_type == 'personnel':
                 print('condition for personnel status met')
                 if new_status in ['on_hold', 'completed']:
@@ -615,26 +646,51 @@ def get_directory_path(directory):
 @login_required
 def fetch_tasks_by_type(request):
     user = request.user
-    if not user.is_authenticated:
-        return JsonResponse({'tasks': []})
-
+    
     try:
         profile = Profile1.objects.get(user=user)
         user_type = profile.user_type
         department = profile.department
+        
+        # Fetch tasks assigned to the current user based on their user_type and department
+        tasks = Task.objects.filter(
+            assigned_personnel=user, 
+            assigned_personnel__profile1__user_type=user_type, 
+            assigned_personnel__profile1__department=department
+        )
+
+        # Categorize tasks by status
+        tasks_pending = tasks.filter(status='pending')
+        tasks_in_progress = tasks.filter(status='in_progress')
+        tasks_on_hold = tasks.filter(status='on_hold')
+        tasks_completed = tasks.filter(status='completed')
+        tasks_approved = tasks.filter(status='approved')
+
+        # Debugging output
+        print(f"Pending Tasks: {tasks_pending.count()}")
+        print(f"In Progress Tasks: {tasks_in_progress.count()}")
+        print(f"On Hold Tasks: {tasks_on_hold.count()}")
+        print(f"Completed Tasks: {tasks_completed.count()}")
+        print(f"Approved Tasks: {tasks_approved.count()}")
+
+        # Render the template with the categorized tasks
+        return render(request, "home/adt_dashboard.html", {
+            'tasks_pending': tasks_pending,
+            'tasks_in_progress': tasks_in_progress,
+            'tasks_on_hold': tasks_on_hold,
+            'tasks_completed': tasks_completed,
+            'tasks_approved': tasks_approved,
+        })
+    
     except Profile1.DoesNotExist:
-        return JsonResponse({'tasks': []})
-
-    print(f"User type: {user_type}, Department: {department}")
-
-    # Fetch tasks assigned to the current user based on their user_type and department
-    tasks = Task.objects.filter(assigned_personnel=user, assigned_personnel__profile1__user_type=user_type, assigned_personnel__profile1__department=department)
-    if not tasks.exists():
-        print("No tasks found for the user")
-        return JsonResponse({'tasks': []})
-
-    task_data = [{'task_name': task.task_name, 'task_id': task.task_id} for task in tasks]
-    return JsonResponse({'tasks': task_data})
+        print(f"No profile found for username: {user.username}")
+        return render(request, "home/adt_dashboard.html", {
+            'tasks_pending': [],
+            'tasks_in_progress': [],
+            'tasks_on_hold': [],
+            'tasks_completed': [],
+            'tasks_approved': [],
+        })
 
 # Adding the view functions for recurring task
 
