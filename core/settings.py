@@ -34,7 +34,7 @@ DEBUG = env('DEBUG')
 ASSETS_ROOT = os.getenv('ASSETS_ROOT', '/static/assets')
 
 # load production server from .env
-ALLOWED_HOSTS = ['localhost', 'localhost:85', '127.0.0.1', env('SERVER', default='127.0.0.1')]
+ALLOWED_HOSTS = ['localhost', 'localhost:85','161.35.36.91','https://tracking.nelkins.com','http://tracking.nelkins.com','tracking.nelkins.com', '127.0.0.1', env('SERVER', default='127.0.0.1')]
 CSRF_TRUSTED_ORIGINS = ['http://localhost:85', 'http://127.0.0.1', 'https://' + env('SERVER', default='127.0.0.1')]
 
 # Application definition
@@ -185,3 +185,19 @@ if GITHUB_AUTH:
             'key': ''
         }
     }
+
+# email configuration
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'paulikmwendan@gmail.com'
+# EMAIL_HOST_PASSWORD = 'mcfd jqzq evvw fmcy '
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'mail.nelkins.com'
+EMAIL_PORT = 587
+EMAIL_USE_TSL = True
+EMAIL_HOST_USER = 'office@nelkins.com'
+EMAIL_HOST_PASSWORD = '#Palsik86*'
