@@ -429,52 +429,93 @@ from .models import Task, RecurringTask, Profile1
 
 @login_required
 def auditing_dashboard(request):
-    user = request.user
-    tasks = Task.objects.filter(assigned_personnel=user)
+    # Get the logged-in user's Profile1 instance
+    user_Profile1 = Profile1.objects.get(user=request.user)
+    print("User Profile ID:", user_Profile1.id)
+    print("Assigned User:", user_Profile1.user.username)
+    
+    # Single tasks categorized by status
+    tasks_pending = Task.objects.filter(assigned_personnel=user_Profile1.user, status='pending')
+    tasks_in_progress = Task.objects.filter(assigned_personnel=user_Profile1.user, status='in_progress')
+    tasks_completed = Task.objects.filter(assigned_personnel=user_Profile1.user, status='completed')
+    tasks_approved = Task.objects.filter(assigned_personnel=user_Profile1.user, status='approved')
+    tasks_on_hold = Task.objects.filter(assigned_personnel=user_Profile1.user, status='on_hold')
+    
+    # Print the task IDs to debug
+    for task in tasks_in_progress:
+        print("In Progress Task ID:", task.task_id, "Task Name:", task.task_name)
 
-    try:
-        personnel_profile = Profile1.objects.get(user=user)
-        recurring_tasks = RecurringTask.objects.filter(assigned_personnel=personnel_profile)
-        print(f"Assigned recurring tasks for {user.username}: {recurring_tasks}")
-
-        # Categorize recurring tasks by status
-        tasks_pending = recurring_tasks.filter(status='pending')
-        tasks_in_progress = recurring_tasks.filter(status='in_progress')
-        tasks_on_hold = recurring_tasks.filter(status='on_hold')
-        tasks_completed = recurring_tasks.filter(status='completed')
-        tasks_approved = recurring_tasks.filter(status='approved')
-
-    except Profile1.DoesNotExist:
-        tasks_pending = tasks_in_progress = tasks_on_hold = tasks_completed = tasks_approved = []
-        print(f"No profile found for username: {user.username}")
+    # Recurring tasks categorized by status
+    recurring_tasks_pending = RecurringTask.objects.filter(assigned_personnel=user_Profile1, status='pending')
+    recurring_tasks_in_progress = RecurringTask.objects.filter(assigned_personnel=user_Profile1, status='in_progress')
+    recurring_tasks_completed = RecurringTask.objects.filter(assigned_personnel=user_Profile1, status='completed')
+    recurring_tasks_on_hold = RecurringTask.objects.filter(assigned_personnel=user_Profile1, status='on_hold')
+    recurring_tasks_approved = RecurringTask.objects.filter(assigned_personnel=user_Profile1, status='approved')
+    recurring_tasks_assigned = RecurringTask.objects.filter(assigned_personnel=user_Profile1, status='assigned')
+    
+    # Print the recurring task IDs to debug
+    for task in recurring_tasks_pending:
+        print("Pending Recurring Task ID:", task.id, "Task Name:", task.task_name)
 
     return render(request, "home/adt_dashboard.html", {
-        "user_tasks": tasks,
         "tasks_pending": tasks_pending,
         "tasks_in_progress": tasks_in_progress,
-        "tasks_on_hold": tasks_on_hold,
         "tasks_completed": tasks_completed,
         "tasks_approved": tasks_approved,
+        "tasks_on_hold": tasks_on_hold,
+        "recurring_tasks_pending": recurring_tasks_pending,
+        "recurring_tasks_in_progress": recurring_tasks_in_progress,
+        "recurring_tasks_completed": recurring_tasks_completed,
+        "recurring_tasks_on_hold": recurring_tasks_on_hold,
+        "recurring_tasks_approved": recurring_tasks_approved,
+        "recurring_tasks_assigned": recurring_tasks_assigned,
     })
-
 
 @login_required
 def bookkeeping_dashboard(request):
-    user = request.user
-    tasks = Task.objects.filter(assigned_personnel=user)
 
-    try:
-        personnel_profile = Profile1.objects.get(user=user)
-        assigned_recurring_tasks = RecurringTask.objects.filter(assigned_personnel=personnel_profile)
-        print(f"Assigned recurring tasks for {user.username}: {assigned_recurring_tasks}")
-    except Profile1.DoesNotExist:
-        assigned_recurring_tasks = None
-        print(f"No profile found for username: {user.username}")
+    # Get the logged-in user's Profile1 instance
+    user_Profile1 = Profile1.objects.get(user=request.user)
+    print("User Profile ID:", user_Profile1.id)
+    print("Assigned User:", user_Profile1.user.username)
+    
+    # Single tasks categorized by status
+    tasks_pending = Task.objects.filter(assigned_personnel=user_Profile1.user, status='pending')
+    tasks_in_progress = Task.objects.filter(assigned_personnel=user_Profile1.user, status='in_progress')
+    tasks_completed = Task.objects.filter(assigned_personnel=user_Profile1.user, status='completed')
+    tasks_approved = Task.objects.filter(assigned_personnel=user_Profile1.user, status='approved')
+    tasks_on_hold = Task.objects.filter(assigned_personnel=user_Profile1.user, status='on_hold')
+    
+    # Print the task IDs to debug
+    for task in tasks_in_progress:
+        print("In Progress Task ID:", task.task_id, "Task Name:", task.task_name)
+
+    # Recurring tasks categorized by status
+    recurring_tasks_pending = RecurringTask.objects.filter(assigned_personnel=user_Profile1, status='pending')
+    recurring_tasks_in_progress = RecurringTask.objects.filter(assigned_personnel=user_Profile1, status='in_progress')
+    recurring_tasks_completed = RecurringTask.objects.filter(assigned_personnel=user_Profile1, status='completed')
+    recurring_tasks_on_hold = RecurringTask.objects.filter(assigned_personnel=user_Profile1, status='on_hold')
+    recurring_tasks_approved = RecurringTask.objects.filter(assigned_personnel=user_Profile1, status='approved')
+    recurring_tasks_assigned = RecurringTask.objects.filter(assigned_personnel=user_Profile1, status='assigned')
+    
+    # Print the recurring task IDs to debug
+    for task in recurring_tasks_pending:
+        print("Pending Recurring Task ID:", task.id, "Task Name:", task.task_name)
 
     return render(request, "home/bk_dashboard.html", {
-        "user_tasks": tasks,
-        "assigned_recurring_tasks": assigned_recurring_tasks,
+        "tasks_pending": tasks_pending,
+        "tasks_in_progress": tasks_in_progress,
+        "tasks_completed": tasks_completed,
+        "tasks_approved": tasks_approved,
+        "tasks_on_hold": tasks_on_hold,
+        "recurring_tasks_pending": recurring_tasks_pending,
+        "recurring_tasks_in_progress": recurring_tasks_in_progress,
+        "recurring_tasks_completed": recurring_tasks_completed,
+        "recurring_tasks_on_hold": recurring_tasks_on_hold,
+        "recurring_tasks_approved": recurring_tasks_approved,
+        "recurring_tasks_assigned": recurring_tasks_assigned,
     })
+
 
 @login_required
 def supervisor_dashboard(request):
@@ -954,7 +995,7 @@ def send_status_email_to_personnel1(task, recipient_email):
     send_mail(
         'Task Status Updated',
         f'The status of task "{task.task_name}" has been updated to "{task.status}".',
-        'paulikmwendan@gmail.com',
+        'office@nelkins.com',
         [recipient_email],
         fail_silently=False,
     )

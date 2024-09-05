@@ -183,87 +183,130 @@
                                 <!--Start of Task status Display-->
 
                                    <div class="container">
-                                    <h3 class="mt-5 text-center">Single Tasks Status</h3>
+                                   <h3 class="mt-5 text-center p-3 bg-light text-dark rounded">
+                                    Single Tasks Status
+                                    </h3>
+
                                     <div class="row mt-4">
+                                        <!-- Pending Tasks -->
                                         <div class="col-md-3">
                                             <h5>Pending Tasks</h5>
-                                            <ul class="list-group">
+                                            <ul class="list-group" style="max-height: 200px; overflow-y: auto;">
                                                 {% if tasks_pending %}
                                                     {% for task in tasks_pending %}
-                                                        <li class="list-group-item">
+                                                        <li class="list-group-item {% if forloop.counter > 3 %}d-none{% endif %}">
                                                             <strong><a href="{% url 'task_detail' task.task_id %}">{{ task.task_name }}</a></strong><br>
                                                             Assigned to: {{ task.assigned_personnel.username }}
                                                         </li>
                                                     {% endfor %}
+                                                    {% if tasks_pending|length > 3 %}
+                                                        <li class="list-group-item text-center">
+                                                            <a href="#" onclick="viewAll(this); return false;">View all</a>
+                                                        </li>
+                                                    {% endif %}
                                                 {% else %}
                                                     <li class="list-group-item">No items to list</li>
                                                 {% endif %}
                                             </ul>
+                                            <small class="text-muted">Total: {{ tasks_pending|length }}</small>
                                         </div>
-                                
+                                    
+                                        <!-- Tasks In Progress -->
                                         <div class="col-md-3">
                                             <h5>Tasks In Progress</h5>
-                                            <ul class="list-group">
+                                            <ul class="list-group" style="max-height: 200px; overflow-y: auto;">
                                                 {% if tasks_in_progress %}
                                                     {% for task in tasks_in_progress %}
-                                                        <li class="list-group-item">
+                                                        <li class="list-group-item {% if forloop.counter > 3 %}d-none{% endif %}">
                                                             <strong><a href="{% url 'task_detail' task.task_id %}">{{ task.task_name }}</a></strong><br>
                                                             Assigned to: {{ task.assigned_personnel.username }}
                                                         </li>
                                                     {% endfor %}
+                                                    {% if tasks_in_progress|length > 3 %}
+                                                        <li class="list-group-item text-center">
+                                                            <a href="#" onclick="viewAll(this); return false;">View all</a>
+                                                        </li>
+                                                    {% endif %}
                                                 {% else %}
                                                     <li class="list-group-item">No items to list</li>
                                                 {% endif %}
                                             </ul>
+                                            <small class="text-muted">Total: {{ tasks_in_progress|length }}</small>
                                         </div>
-                                
+                                    
+                                        <!-- Tasks On Hold -->
                                         <div class="col-md-3">
                                             <h5>Tasks On Hold</h5>
-                                            <ul class="list-group">
+                                            <ul class="list-group" style="max-height: 200px; overflow-y: auto;">
                                                 {% if tasks_on_hold %}
                                                     {% for task in tasks_on_hold %}
-                                                        <li class="list-group-item">
+                                                        <li class="list-group-item {% if forloop.counter > 3 %}d-none{% endif %}">
                                                             <strong><a href="{% url 'task_detail' task.task_id %}">{{ task.task_name }}</a></strong><br>
                                                             Assigned to: {{ task.assigned_personnel.username }}
                                                         </li>
                                                     {% endfor %}
+                                                    {% if tasks_on_hold|length > 3 %}
+                                                        <li class="list-group-item text-center">
+                                                            <a href="#" onclick="viewAll(this); return false;">View all</a>
+                                                        </li>
+                                                    {% endif %}
                                                 {% else %}
                                                     <li class="list-group-item">No items to list</li>
                                                 {% endif %}
                                             </ul>
+                                            <small class="text-muted">Total: {{ tasks_on_hold|length }}</small>
                                         </div>
-                                
+                                    
+                                        <!-- Completed Tasks -->
                                         <div class="col-md-3">
                                             <h5>Completed Tasks</h5>
-                                            <ul class="list-group">
+                                            <ul class="list-group" style="max-height: 200px; overflow-y: auto;">
                                                 {% if tasks_completed %}
                                                     {% for task in tasks_completed %}
-                                                        <li class="list-group-item">
+                                                        <li class="list-group-item {% if forloop.counter > 3 %}d-none{% endif %}">
                                                             <strong><a href="{% url 'task_detail' task.task_id %}">{{ task.task_name }}</a></strong><br>
                                                             Assigned to: {{ task.assigned_personnel.username }}
                                                         </li>
                                                     {% endfor %}
+                                                    {% if tasks_completed|length > 3 %}
+                                                        <li class="list-group-item text-center">
+                                                            <a href="#" onclick="viewAll(this); return false;">View all</a>
+                                                        </li>
+                                                    {% endif %}
                                                 {% else %}
                                                     <li class="list-group-item">No items to list</li>
                                                 {% endif %}
                                             </ul>
+                                            <small class="text-muted">Total: {{ tasks_completed|length }}</small>
                                         </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <h5>Approved Tasks</h5>
-                                        <ul class="list-group">
-                                            {% if tasks_approved %}
-                                                {% for task in tasks_approved %}
-                                                    <li class="list-group-item">
-                                                        <strong><a href="{% url 'task_detail' task.task_id %}">{{ task.task_name }}</a></strong><br>
-                                                        Assigned to: {{ task.assigned_personnel.username }}
-                                                    </li>
-                                                {% endfor %}
-                                            {% else %}
-                                                <li class="list-group-item">No items to list</li>
-                                            {% endif %}
-                                        </ul>
-                                    </div>
+                                    
+                                        <!-- Approved Tasks -->
+                                        <div class="col-md-3">
+                                            <h5>Approved Tasks</h5>
+                                            <ul class="list-group" style="max-height: 200px; overflow-y: auto;">
+                                                {% if tasks_approved %}
+                                                    {% for task in tasks_approved %}
+                                                        <li class="list-group-item {% if forloop.counter > 3 %}d-none{% endif %}">
+                                                            <strong><a href="{% url 'task_detail' task.task_id %}">{{ task.task_name }}</a></strong><br>
+                                                            Assigned to: {{ task.assigned_personnel.username }}
+                                                        </li>
+                                                    {% endfor %}
+                                                    {% if tasks_approved|length > 3 %}
+                                                        <li class="list-group-item text-center">
+                                                            <a href="#" onclick="viewAll(this); return false;">View all</a>
+                                                        </li>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <li class="list-group-item">No items to list</li>
+                                                    {% endif %}
+                                                </ul>
+                                                <small class="text-muted">Total: {{ tasks_approved|length }}</small>
+                                            </div>
+                                        </div>
+                                    
+                                    
+                                    
+                                    
                                 </div>                               
                                 
 
@@ -272,113 +315,100 @@
                                     
                                 </div>
                                 <!-- Assigned Reccuring Task CLient -->
-                                <h3 class="mt-5 text-center">Recurrent Tasks Status</h3>
+                                <h3 class="mt-5 text-center p-3 bg-light text-dark rounded">Recurrent Tasks Status</h3>
                                 <!-- Recurring Tasks Section -->
-                                    <div class="row mt-5">
-                                        
-                                        <div class="col-md-3">
-                                            <h4>Assigned RTasks</h4>
-                                            <ul id="recurringtasks-assigned-section" class="list-group">
-                                                {% if recurring_tasks_assigned %}
-                                                    {% for task in recurring_tasks_assigned %}
-                                                        <li class="list-group-item">
-                                                            <a href="{% url 'client_recurring_tasks' task.client.user.username %}">{{ task.task_name }} - {{task.client.user.username}}</a>
-                                                        </li>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    <li class="list-group-item">No assigned tasks</li>
+                                <div class="row mt-4">
+                                    <!-- In Progress RTasks -->
+                                    <div class="col-md-3">
+                                        <h4>In Progress RTasks</h4>
+                                        <ul id="recurringtasks-in-progress-section" class="list-group" style="max-height: 200px; overflow-y: auto;">
+                                            {% if recurring_tasks_in_progress %}
+                                                {% for task in recurring_tasks_in_progress %}
+                                                    <li class="list-group-item {% if forloop.counter > 3 %}d-none{% endif %}">
+                                                        <a href="{% url 'client_recurring_tasks' task.client.user.username %}">{{ task.task_name }} - {{ task.client.user.username }}</a><br>
+                                                        Assigned to: {{ task.assigned_personnel.username }}
+                                                    </li>
+                                                {% endfor %}
+                                                {% if recurring_tasks_in_progress|length > 3 %}
+                                                    <li class="list-group-item text-center">
+                                                        <a href="#" onclick="viewAll('recurringtasks-in-progress-section'); return false;">View all</a>
+                                                    </li>
                                                 {% endif %}
-                                            </ul>
-                                        </div>
-
-                                        <div class="col-md-3">
-                                            <h4>Pending RTasks</h4>
-                                            <ul id="recurringtasks-pending-section" class="list-group">
-                                                {% if recurring_tasks_pending %}
-                                                    {% for task in recurring_tasks_pending %}
-                                                        <li class="list-group-item">
-                                                            <a href="{% url 'client_recurring_tasks' task.client.user.username %}">{{ task.task_name }}- {{task.client.user.username}}</a>
-                                                        </li>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    <li class="list-group-item">No pending tasks</li>
+                                            {% else %}
+                                                <li class="list-group-item">No tasks in progress</li>
+                                            {% endif %}
+                                        </ul>
+                                        <small class="text-muted">Total: {{ recurring_tasks_in_progress|length }}</small>
+                                    </div>
+                                
+                                    <!-- On Hold RTasks -->
+                                    <div class="col-md-3">
+                                        <h4>On Hold RTasks</h4>
+                                        <ul id="recurringtasks-on-hold-section" class="list-group" style="max-height: 200px; overflow-y: auto;">
+                                            {% if recurring_tasks_on_hold %}
+                                                {% for task in recurring_tasks_on_hold %}
+                                                    <li class="list-group-item {% if forloop.counter > 3 %}d-none{% endif %}">
+                                                        <a href="{% url 'client_recurring_tasks' task.client.user.username %}">{{ task.task_name }} - {{ task.client.user.username }}</a><br>
+                                                        Assigned to: {{ task.assigned_personnel.username }}
+                                                    </li>
+                                                {% endfor %}
+                                                {% if recurring_tasks_on_hold|length > 3 %}
+                                                    <li class="list-group-item text-center">
+                                                        <a href="#" onclick="viewAll('recurringtasks-on-hold-section'); return false;">View all</a>
+                                                    </li>
                                                 {% endif %}
-                                            </ul>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <h4>In Progress RTasks</h4>
-                                            <ul id="recurringtasks-in-progress-section" class="list-group">
-                                                {% if recurring_tasks_in_progress %}
-                                                    {% for task in recurring_tasks_in_progress %}
-                                                        <li class="list-group-item">
-                                                            <a href="{% url 'client_recurring_tasks' task.client.user.username %}">{{ task.task_name }}- {{task.client.user.username}}</a>
-                                                        </li>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    <li class="list-group-item">No tasks in progress</li>
+                                            {% else %}
+                                                <li class="list-group-item">No held tasks</li>
+                                            {% endif %}
+                                        </ul>
+                                        <small class="text-muted">Total: {{ recurring_tasks_on_hold|length }}</small>
+                                    </div>
+                                
+                                    <!-- Completed RTasks -->
+                                    <div class="col-md-3">
+                                        <h4>Completed RTasks</h4>
+                                        <ul id="recurringtasks-completed-section" class="list-group" style="max-height: 200px; overflow-y: auto;">
+                                            {% if recurring_tasks_completed %}
+                                                {% for task in recurring_tasks_completed %}
+                                                    <li class="list-group-item {% if forloop.counter > 3 %}d-none{% endif %}">
+                                                        <a href="{% url 'client_recurring_tasks' task.client.user.username %}">{{ task.task_name }} - {{ task.client.user.username }}</a><br>
+                                                        Assigned to: {{ task.assigned_personnel.username }}
+                                                    </li>
+                                                {% endfor %}
+                                                {% if recurring_tasks_completed|length > 3 %}
+                                                    <li class="list-group-item text-center">
+                                                        <a href="#" onclick="viewAll('recurringtasks-completed-section'); return false;">View all</a>
+                                                    </li>
                                                 {% endif %}
-                                            </ul>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <h4>On Hold RTasks</h4>
-                                            <ul id="recurringtasks-on-hold-section" class="list-group">
-                                                {% if recurring_tasks_on_hold %}
-                                                    {% for task in recurring_tasks_on_hold %}
-                                                        <li class="list-group-item">
-                                                            <a href="{% url 'client_recurring_tasks' task.client.user.username %}">{{ task.task_name }}- {{task.client.user.username}}</a>
-                                                        </li>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    <li class="list-group-item">No held tasks</li>
+                                            {% else %}
+                                                <li class="list-group-item">No completed tasks</li>
+                                            {% endif %}
+                                        </ul>
+                                        <small class="text-muted">Total: {{ recurring_tasks_completed|length }}</small>
+                                    </div>
+                                
+                                    <!-- Approved RTasks -->
+                                    <div class="col-md-3">
+                                        <h4>Approved RTasks</h4>
+                                        <ul id="recurringtasks-approved-section" class="list-group" style="max-height: 200px; overflow-y: auto;">
+                                            {% if recurring_tasks_approved %}
+                                                {% for task in recurring_tasks_approved %}
+                                                    <li class="list-group-item {% if forloop.counter > 3 %}d-none{% endif %}">
+                                                        <a href="{% url 'client_recurring_tasks' task.client.user.username %}">{{ task.task_name }} - {{ task.client.user.username }}</a><br>
+                                                        Assigned to: {{ task.assigned_personnel.username }}
+                                                    </li>
+                                                {% endfor %}
+                                                {% if recurring_tasks_approved|length > 3 %}
+                                                    <li class="list-group-item text-center">
+                                                        <a href="#" onclick="viewAll('recurringtasks-approved-section'); return false;">View all</a>
+                                                    </li>
                                                 {% endif %}
-                                            </ul>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <h4>Completed RTasks</h4>
-                                            <ul id="recurringtasks-completed-section" class="list-group">
-                                                {% if recurring_tasks_completed %}
-                                                    {% for task in recurring_tasks_completed %}
-                                                        <li class="list-group-item">
-                                                            <a href="{% url 'client_recurring_tasks' task.client.user.username %}">{{ task.task_name }}- {{task.client.user.username}}</a>
-                                                        </li>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    <li class="list-group-item">No completed tasks</li>
-                                                {% endif %}
-                                            </ul>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <h4>Approved RTasks</h4>
-                                            <ul id="recurringtasks-approved-section" class="list-group">
-                                                {% if recurring_tasks_approved %}
-                                                    {% for task in recurring_tasks_approved %}
-                                                        <li class="list-group-item">
-                                                            <a href="{% url 'client_recurring_tasks' task.client.user.username %}">{{ task.task_name }}- {{task.client.user.username}}</a>
-                                                        </li>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    <li class="list-group-item">No approved tasks</li>
-                                                {% endif %}
-                                            </ul>
-                                        </div>
-                                                                       
-                                    <!-- Recurring Task Clients Section -->
-                                    <!-- <div class="row mt-5">
-                                        <div class="col-md-3">
-                                            <h4>Recurring Task Clients</h4>
-                                            <ul>
-                                                {% if clients_with_recurring_tasks %}
-                                                    {% for client in clients_with_recurring_tasks %}
-                                                        <li>
-                                                            <a href="{% url 'client_recurring_tasks' client.user.username %}">{{ client.user.username }}</a>
-                                                        </li>
-                                                    {% endfor %}
-                                                {% else %}
-                                                    <li>No clients with tasks</li>
-                                                {% endif %}
-                                            </ul>
-                                        </div>
-                                    </div> -->
+                                            {% else %}
+                                                <li class="list-group-item">No approved tasks</li>
+                                            {% endif %}
+                                        </ul>
+                                        <small class="text-muted">Total: {{ recurring_tasks_approved|length }}</small>
+                                    </div>
                                 </div>
                                 
                                 

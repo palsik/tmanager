@@ -25,7 +25,8 @@
                                 <div class="container">
                                     <h1>Task: {{ task.task_name }}</h1>
                                     <p>Status: {{ task.status }}</p>
-                                    <p>Assigned to: {{ task.assigned_personnel.user.username }}</p>
+                                    <p>Assigned to: {{ task.assigned_personnel.username }}</p>
+                                    <p>Task Description: {{ task.description }}</p>
                                 
                                     <!-- Status Update Form -->
                                     {% if user_profile.user_type == 'supervisor' %}

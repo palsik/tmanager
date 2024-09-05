@@ -406,51 +406,13 @@ function fetchTaskStatus() {
 
 // And here for the Recurrent function in Auditing DashBoard
 
-// Start Categorisation for Client Tasks section in the Auditting
-document.addEventListener("DOMContentLoaded", function() {
-    fetchTaskStatus3();
-});
-
-function fetchTaskStatus3() {
-    fetch('/auditing_dashboard/')
-        .then(response => {
-            if (response.ok) {
-                return response.text();
-            }
-            throw new Error('Network response was not ok.');
-        })
-        .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-
-            // Update single task sections
-            updateTaskSection('stasks-pending-section', doc.getElementById('stasks-pending-section').innerHTML);
-            updateTaskSection('stasks-in-progress-section', doc.getElementById('stasks-in-progress-section').innerHTML);
-            updateTaskSection('stasks-on-hold-section', doc.getElementById('stasks-on-hold-section').innerHTML);
-            updateTaskSection('stasks-completed-section', doc.getElementById('stasks-completed-section').innerHTML);
-            updateTaskSection('stasks-approved-section', doc.getElementById('stasks-approved-section').innerHTML);
-
-            // Update recurring task sections
-            updateTaskSection('rtasks-pending-section', doc.getElementById('rtasks-pending-section').innerHTML);
-            updateTaskSection('rtasks-in-progress-section', doc.getElementById('rtasks-in-progress-section').innerHTML);
-            updateTaskSection('rtasks-on-hold-section', doc.getElementById('rtasks-on-hold-section').innerHTML);
-            updateTaskSection('rtasks-completed-section', doc.getElementById('rtasks-completed-section').innerHTML);
-            updateTaskSection('rtasks-approved-section', doc.getElementById('rtasks-approved-section').innerHTML);
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-        });
-}
-
-function updateTaskSection(sectionId, content) {
-    const section = document.getElementById(sectionId);
-    section.innerHTML = content; // Update the section with new content
-}
-
-function updateTaskSection(sectionId, doc) {
-    document.getElementById(sectionId).innerHTML = doc.getElementById(sectionId).innerHTML;
-}
-
+// viewing all tasks if task categorissation exceed three
+function viewAll(link) {
+        const listGroup = link.closest('.list-group');
+        const hiddenItems = listGroup.querySelectorAll('.d-none');
+        hiddenItems.forEach(item => item.classList.remove('d-none'));
+        link.closest('li').remove();
+    }
 
 function updateTaskSection(sectionId, doc) {
     const sectionElement = document.getElementById(sectionId);

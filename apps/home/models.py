@@ -230,7 +230,7 @@ class RecurringTask(models.Model):
     interval = models.CharField(max_length=10, choices=INTERVAL_CHOICES)
     assigned_personnel = models.ForeignKey(Profile1, on_delete=models.CASCADE, related_name='assigned_recurring_tasks')
     client = models.ForeignKey(Profile1, on_delete=models.CASCADE, related_name='recurring_tasks')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='assigned')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_progress')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     files = models.ManyToManyField(RecurrentFiles, related_name='recurring_tasks', blank=True)  # New field for files
