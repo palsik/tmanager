@@ -619,17 +619,17 @@ def task_detail(request, task_id):
 
 def send_status_email_to_personnel(task, recipient_email):
     send_mail(
-        'Task Status Updated',
-        f'The status of task "{task.task_name}" has been updated to "{task.status}".',
-        'paulikmwendan@gmail.com',
+        f'Task: "{task.task_name}" Status Updated', 
+        f'The status of task "{task.task_name}" has been updated to "{task.status}" by Supervisor.',
+        'office@nelkins.com',
         [recipient_email],
         fail_silently=False,
     )
 
 def send_status_email_to_supervisor(task, recipient_email):
     send_mail(
-        'Task Status Updated',
-        f'The status of task "{task.task_name}" has been updated to "{task.status}".',
+        f'Task: "{task.task_name}" Status Updated',
+        f'The status of task "{task.task_name}" has been updated to "{task.status}" by "{task.assigned_personnel}"  .',
         'office@nelkins.com',
         [recipient_email],
         fail_silently=False,
@@ -932,8 +932,8 @@ def personnel_recurring_task_detail(request, task_id):
                 if new_status in ['pending', 'completed']:
                     task.status = new_status
                     task.save()
-                    print(f'The task is: {task.task_name}, The mail is: {task.client.user.email}')
-                    send_status_email_to_supervisor1(task, task.client.user.email)
+                    print(f'The task is: {task.task_name}, The mail is: {task.assigned_personnel.email}')
+                    send_status_email_to_supervisor1(task, 'office@nelkins.com')
             return redirect('personnel_recurring_task_detail', task_id=task_id)
         elif 'create_directory' in request.POST:
             return Rcreate_directory(request, task_id)
@@ -950,8 +950,8 @@ def personnel_recurring_task_detail(request, task_id):
 
 def send_status_email_to_supervisor1(task, recipient_email):
     send_mail(
-        'Task Status Updated',
-        f'The status of task "{task.task_name}" has been updated to "{task.status}".',
+        f'Task "{task.task_name}" Status Updated',
+        f'Task: "{task.task_name}" has been updated to "{task.status}" by "{task.assigned_personnel}" .',
         'office@nelkins.com',
         [recipient_email],
         fail_silently=False,
@@ -971,11 +971,11 @@ def supervisor_recurring_task_detail(request, task_id):
             user_profile = Profile1.objects.get(user=request.user)
             if user_profile.user_type == 'supervisor':
                 print('condition for supervisor status met')
-                if new_status in ['assigned', 'in_progress', 'approved']:
+                if new_status in ['in_progress', 'approved']:
                     task.status = new_status
                     task.save()
-                    print(f'The task is: {task.task_name}, The mail is: {task.assigned_personnel.user.email}')
-                    send_status_email_to_personnel1(task, task.assigned_personnel.user.email)
+                    print(f'The task is: {task.task_name}, The mail is: {task.assigned_personnel.email}')
+                    send_status_email_to_personnel1(task, task.assigned_personnel.email)
             return redirect('supervisor_recurring_task_detail', task_id=task_id)
         elif 'create_directory' in request.POST:
             return Rcreate_directory(request, task_id)
@@ -992,9 +992,10 @@ def supervisor_recurring_task_detail(request, task_id):
     })
 
 def send_status_email_to_personnel1(task, recipient_email):
+    print(f'send reccurring status to personnel is reached to {recipient_email}.')
     send_mail(
-        'Task Status Updated',
-        f'The status of task "{task.task_name}" has been updated to "{task.status}".',
+        f'Task: "{task.task_name}" Status Updated', 
+        f'The status of task "{task.task_name}" has been updated to "{task.status}" by Supervisor.',
         'office@nelkins.com',
         [recipient_email],
         fail_silently=False,
