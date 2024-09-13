@@ -182,7 +182,7 @@
                                                     {% endfor %}
                                                     {% if recurring_tasks_in_progress|length > 3 %}
                                                         <li class="list-group-item text-center">
-                                                            <a href="#" onclick="viewAll('rtasks-in-progress-section'); return false;">View all</a>
+                                                            <a href="#" onclick="viewAll21('rtasks-in-progress-section'); return false;">View all</a>
                                                         </li>
                                                     {% endif %}
                                                 {% else %}
@@ -191,6 +191,7 @@
                                             </ul>
                                             <small class="text-muted">Total: {{ recurring_tasks_in_progress|length }}</small>
                                         </div>
+                                        
                                         
                                         <!-- On Hold Recurring Tasks Section -->
                                         <div id="rtasks-on-hold-section" class="col-md-4">
@@ -205,7 +206,7 @@
                                                     {% endfor %}
                                                     {% if recurring_tasks_on_hold|length > 3 %}
                                                         <li class="list-group-item text-center">
-                                                            <a href="#" onclick="viewAll('rtasks-on-hold-section'); return false;">View all</a>
+                                                            <a href="#" onclick="viewAll22('rtasks-on-hold-section'); return false;">View all</a>
                                                         </li>
                                                     {% endif %}
                                                 {% else %}
@@ -214,6 +215,7 @@
                                             </ul>
                                             <small class="text-muted">Total: {{ recurring_tasks_on_hold|length }}</small>
                                         </div>
+                                        
                                         
                                         <!-- Completed Recurring Tasks Section -->
                                         <div id="rtasks-completed-section" class="col-md-4">
@@ -228,7 +230,7 @@
                                                     {% endfor %}
                                                     {% if recurring_tasks_completed|length > 3 %}
                                                         <li class="list-group-item text-center">
-                                                            <a href="#" onclick="viewAll('rtasks-completed-section'); return false;">View all</a>
+                                                            <a href="#" onclick="viewAll23('rtasks-completed-section'); return false;">View all</a>
                                                         </li>
                                                     {% endif %}
                                                 {% else %}
@@ -237,6 +239,7 @@
                                             </ul>
                                             <small class="text-muted">Total: {{ recurring_tasks_completed|length }}</small>
                                         </div>
+                                        
                                         
                                         <!-- Approved Recurring Tasks Section -->
                                         <div id="rtasks-approved-section" class="col-md-4">
@@ -251,7 +254,7 @@
                                                     {% endfor %}
                                                     {% if recurring_tasks_approved|length > 3 %}
                                                         <li class="list-group-item text-center">
-                                                            <a href="#" onclick="viewAll('rtasks-approved-section'); return false;">View all</a>
+                                                            <a href="#" onclick="viewAll25('rtasks-approved-section'); return false;">View all</a>
                                                         </li>
                                                     {% endif %}
                                                 {% else %}
@@ -260,6 +263,7 @@
                                             </ul>
                                             <small class="text-muted">Total: {{ recurring_tasks_approved|length }}</small>
                                         </div>
+                                        
                                     </div>
                                                                  
                                     

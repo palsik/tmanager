@@ -404,9 +404,82 @@ function fetchTaskStatus() {
         });
 }
 
-// And here for the Recurrent function in Auditing DashBoard
+
 
 // viewing all tasks if task categorissation exceed three
+// supervisor Single tasks 
+    // Pending Tasks
+    function viewAll01(sectionId) {
+    const section = sectionId.closest('.list-group');
+    if (section) {
+        const hiddenItems = section.querySelectorAll('.d-none');
+        hiddenItems.forEach(item => item.classList.remove('d-none'));
+        
+        const viewAllLink = section.querySelector('a[href="#"]');
+        if (viewAllLink) {
+            viewAllLink.closest('li').remove();
+        }
+    }
+}
+
+//Task in Progress
+function viewAll02(sectionId) {
+    const section = sectionId.closest('.list-group');
+    if (section) {
+        const hiddenItems = section.querySelectorAll('.d-none');
+        hiddenItems.forEach(item => item.classList.remove('d-none'));
+        
+        const viewAllLink = section.querySelector('a[href="#"]');
+        if (viewAllLink) {
+            viewAllLink.closest('li').remove();
+        }
+    }
+}
+
+//Task on Hold
+function viewAll03(sectionId) {
+    const section = sectionId.closest('.list-group');
+    if (section) {
+        const hiddenItems = section.querySelectorAll('.d-none');
+        hiddenItems.forEach(item => item.classList.remove('d-none'));
+        
+        const viewAllLink = section.querySelector('a[href="#"]');
+        if (viewAllLink) {
+            viewAllLink.closest('li').remove();
+        }
+    }
+}
+
+//Task Completed
+function viewAll04(sectionId) {
+    const section = sectionId.closest('.list-group');
+    if (section) {
+        const hiddenItems = section.querySelectorAll('.d-none');
+        hiddenItems.forEach(item => item.classList.remove('d-none'));
+        
+        const viewAllLink = section.querySelector('a[href="#"]');
+        if (viewAllLink) {
+            viewAllLink.closest('li').remove();
+        }
+    }
+}
+
+//Task Aproved
+function viewAll05(sectionId) {
+    const section = sectionId.closest('.list-group');
+    if (section) {
+        const hiddenItems = section.querySelectorAll('.d-none');
+        hiddenItems.forEach(item => item.classList.remove('d-none'));
+        
+        const viewAllLink = section.querySelector('a[href="#"]');
+        if (viewAllLink) {
+            viewAllLink.closest('li').remove();
+        }
+    }
+}
+
+
+
 function viewAll(link) {
         const listGroup = link.closest('.list-group');
         const hiddenItems = listGroup.querySelectorAll('.d-none');
@@ -421,7 +494,296 @@ function updateTaskSection(sectionId, doc) {
     }
 }
 
-// End Categorisation for Client Recurrent section in the Supervisor
+// viewing all Rtasks if task categorissation exceed three
+function viewAll1(sectionId) {
+    const listGroup = document.getElementById(sectionId);
+    if (listGroup) {
+        // Find all hidden items with the 'd-none' class within the list group
+        const hiddenItems = listGroup.querySelectorAll('.d-none');
+        
+        // Remove the 'd-none' class from all hidden items to make them visible
+        hiddenItems.forEach(item => item.classList.remove('d-none'));
+        
+        // Find and remove the "View all" link (the parent li element)
+        const viewAllItem = listGroup.querySelector('.list-group-item.text-center');
+        if (viewAllItem) {
+            viewAllItem.remove();
+        }
+    }
+}
+
+function updateTaskSection(sectionId, doc) {
+    const sectionElement = document.getElementById(sectionId);
+    if (sectionElement) {
+        sectionElement.innerHTML = doc.getElementById(sectionId).innerHTML;
+    }
+}
+
+function viewAll2(link) {
+    // Find the list group that the clicked "View all" link is part of
+    const listGroup = link.closest('.list-group');
+
+    // Select all hidden list items in that list group (those with the 'd-none' class)
+    const hiddenItems = listGroup.querySelectorAll('.d-none');
+    
+    // Remove the 'd-none' class from all hidden items to reveal them
+    hiddenItems.forEach(item => item.classList.remove('d-none'));
+
+    // Remove the "View all" list item itself once clicked
+    link.closest('li').remove();
+}
+
+//Auditting Dashboard view all
+function viewAll21(sectionId) {
+    // Get the section by the provided ID
+    const sectionElement = document.getElementById(sectionId);
+
+    // Find all hidden list items within the section (those with the 'd-none' class)
+    const hiddenItems = sectionElement.querySelectorAll('.d-none');
+
+    // Remove the 'd-none' class from all hidden items to make them visible
+    hiddenItems.forEach(item => item.classList.remove('d-none'));
+
+    // Remove the "View all" list item itself once clicked
+    const viewAllItem = sectionElement.querySelector('.text-center');
+    if (viewAllItem) {
+        viewAllItem.remove();
+    }
+}
+//On_hold Recurring Task Recurring Tasks On Hold
+function viewAll22(sectionId) {
+    // Get the section by the provided ID
+    const sectionElement = document.getElementById(sectionId);
+
+    // Find all hidden list items within the section (those with the 'd-none' class)
+    const hiddenItems = sectionElement.querySelectorAll('.d-none');
+
+    // Remove the 'd-none' class from all hidden items to make them visible
+    hiddenItems.forEach(item => item.classList.remove('d-none'));
+
+    // Remove the "View all" list item itself once clicked
+    const viewAllItem = sectionElement.querySelector('.text-center');
+    if (viewAllItem) {
+        viewAllItem.remove();
+    }
+}
+
+//Completed on hold Recurrent
+function viewAll23(sectionId) {
+    // Get the section by the provided ID
+    const sectionElement = document.getElementById(sectionId);
+
+    // Find all hidden list items within the section (those with the 'd-none' class)
+    const hiddenItems = sectionElement.querySelectorAll('.d-none');
+
+    // Remove the 'd-none' class from all hidden items to make them visible
+    hiddenItems.forEach(item => item.classList.remove('d-none'));
+
+    // Find the "View all" link and remove it after showing all tasks
+    const viewAllLink = sectionElement.querySelector('li.text-center');
+    if (viewAllLink) {
+        viewAllLink.remove();
+    }
+}
+
+//Approved Recurrent Task
+
+function viewAll25(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        const hiddenItems = section.querySelectorAll('.d-none');
+        hiddenItems.forEach(item => item.classList.remove('d-none'));
+        
+        const viewAllLink = section.querySelector('a[href="#"]');
+        if (viewAllLink) {
+            viewAllLink.closest('li').remove();
+        }
+    }
+}
+
+
+//Bookkeeping Dashboard view all
+    //Task in progress
+
+    function viewAll30(sectionId) {
+        var section = document.getElementById(sectionId);
+        var items = section.querySelectorAll('.list-group-item.d-none');
+
+        items.forEach(function(item) {
+            item.classList.remove('d-none');
+        });
+
+        // Optionally, you can hide the "View all" link after it's clicked
+        var viewAllLink = section.querySelector('.text-center');
+        if (viewAllLink) {
+            viewAllLink.style.display = 'none';
+        }
+    }
+
+    //Task on hold
+    function viewAll31(sectionId) {
+    var section = document.getElementById(sectionId);
+    var items = section.querySelectorAll('.list-group-item.d-none');
+
+    items.forEach(function(item) {
+        item.classList.remove('d-none');
+    });
+
+    // Optionally, you can hide the "View all" link after it's clicked
+    var viewAllLink = section.querySelector('.text-center');
+    if (viewAllLink) {
+        viewAllLink.style.display = 'none';
+    }
+}
+
+//Task Completed
+function viewAll32(sectionId) {
+    var section = document.getElementById(sectionId);
+    var items = section.querySelectorAll('.list-group-item.d-none');
+
+    items.forEach(function(item) {
+        item.classList.remove('d-none');
+    });
+
+    // Optionally, you can hide the "View all" link after it's clicked
+    var viewAllLink = section.querySelector('.text-center');
+    if (viewAllLink) {
+        viewAllLink.style.display = 'none';
+    }
+}
+
+//Task Approved
+function viewAll33(sectionId) {
+    var section = document.getElementById(sectionId);
+    var items = section.querySelectorAll('.list-group-item.d-none');
+
+    items.forEach(function(item) {
+        item.classList.remove('d-none');
+    });
+
+    // Optionally, you can hide the "View all" link after it's clicked
+    var viewAllLink = section.querySelector('.text-center');
+    if (viewAllLink) {
+        viewAllLink.style.display = 'none';
+    }
+}
+
+
+//Bookkeeping Dashboard Recurring Task view all
+    //RTask in Progress
+    function viewAll41(sectionId) {
+    var section = document.getElementById(sectionId);
+    var items = section.querySelectorAll('.list-group-item.d-none');
+
+    items.forEach(function(item) {
+        item.classList.remove('d-none');
+    });
+
+    // Optionally, you can hide the "View all" link after it's clicked
+    var viewAllLink = section.querySelector('.text-center');
+    if (viewAllLink) {
+        viewAllLink.style.display = 'none';
+    }
+}
+
+//RTask On Hold
+function viewAll42(sectionId) {
+    var section = document.getElementById(sectionId);
+    var items = section.querySelectorAll('.list-group-item.d-none');
+
+    items.forEach(function(item) {
+        item.classList.remove('d-none');
+    });
+
+    // Optionally, you can hide the "View all" link after it's clicked
+    var viewAllLink = section.querySelector('.text-center');
+    if (viewAllLink) {
+        viewAllLink.style.display = 'none';
+    }
+}
+
+//RTask Completed
+function viewAll43(sectionId) {
+    const section = document.getElementById(sectionId);
+    const items = section.querySelectorAll('.list-group-item.d-none');
+    items.forEach(item => item.classList.remove('d-none'));
+    
+    // Optionally, hide the "View all" link after showing all items
+    const viewAllLink = section.querySelector('.list-group-item.text-center');
+    if (viewAllLink) {
+        viewAllLink.style.display = 'none';
+    }
+}
+
+//RTask Approved
+function viewAll44(sectionId) {
+    const section = document.getElementById(sectionId);
+    const items = section.querySelectorAll('.list-group-item.d-none');
+    items.forEach(item => item.classList.remove('d-none'));
+    
+    // Optionally, hide the "View all" link after showing all items
+    const viewAllLink = section.querySelector('.list-group-item.text-center');
+    if (viewAllLink) {
+        viewAllLink.style.display = 'none';
+    }
+}
+
+
+// View All Task for Recurring tasks
+    //Rtask in Progress
+    function viewAll50(sectionId) {
+    const section = document.getElementById(sectionId);
+    const items = section.querySelectorAll('.list-group-item.d-none');
+    items.forEach(item => item.classList.remove('d-none'));
+    
+    // Optionally, hide the "View all" link after showing all items
+    const viewAllLink = section.querySelector('.list-group-item.text-center');
+    if (viewAllLink) {
+        viewAllLink.style.display = 'none';
+    }
+}
+
+//RTask on hold
+function viewAll51(sectionId) {
+    const section = document.getElementById(sectionId);
+    const items = section.querySelectorAll('.list-group-item.d-none');
+    items.forEach(item => item.classList.remove('d-none'));
+    
+    // Optionally, hide the "View all" link after showing all items
+    const viewAllLink = section.querySelector('.list-group-item.text-center');
+    if (viewAllLink) {
+        viewAllLink.style.display = 'none';
+    }
+}
+
+//RTask Completed
+function viewAll52(sectionId) {
+    const section = document.getElementById(sectionId);
+    const items = section.querySelectorAll('.list-group-item.d-none');
+    items.forEach(item => item.classList.remove('d-none'));
+    
+    // Optionally, hide the "View all" link after showing all items
+    const viewAllLink = section.querySelector('.list-group-item.text-center');
+    if (viewAllLink) {
+        viewAllLink.style.display = 'none';
+    }
+}
+
+//Rtask Approved
+function viewAll53(sectionId) {
+    const section = document.getElementById(sectionId);
+    const items = section.querySelectorAll('.list-group-item.d-none');
+    items.forEach(item => item.classList.remove('d-none'));
+    
+    // Optionally, hide the "View all" link after showing all items
+    const viewAllLink = section.querySelector('.list-group-item.text-center');
+    if (viewAllLink) {
+        viewAllLink.style.display = 'none';
+    }
+}
+
+
+
  
  //Start of fetch client script button
  $(document).ready(function() {

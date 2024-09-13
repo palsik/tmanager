@@ -929,7 +929,7 @@ def personnel_recurring_task_detail(request, task_id):
             user_profile = Profile1.objects.get(user=request.user)
             if user_profile.user_type == 'personnel':
                 print('condition for personnel status met')
-                if new_status in ['pending', 'completed']:
+                if new_status in ['on_hold', 'completed']:
                     task.status = new_status
                     task.save()
                     print(f'The task is: {task.task_name}, The mail is: {task.assigned_personnel.email}')

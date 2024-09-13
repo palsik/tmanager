@@ -38,7 +38,7 @@
                                             <form method="post" action="{% url 'personnel_recurring_task_detail' task.id %}">
                                                 {% csrf_token %}
                                                 <select name="status" required>
-                                                    <option value="pending" {% if task.status == "pending" %}selected{% endif %}>Pending</option>
+                                                    <option value="on_hold" {% if task.status == "on_hold" %}selected{% endif %}>On Hold</option>
                                                     <option value="completed" {% if task.status == "completed" %}selected{% endif %}>Completed</option>
                                                 </select>
                                                 <button type="submit" name="update_status">Update Status</button>
