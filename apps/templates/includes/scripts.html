@@ -782,6 +782,47 @@ function viewAll53(sectionId) {
     }
 }
 
+//View all function for all the clients that have tasks
+function viewAllClients(sectionId) {
+    const section = document.getElementById(sectionId);
+    const items = section.querySelectorAll('.list-group-item.d-none');
+    
+    // Show all hidden items
+    items.forEach(item => item.classList.remove('d-none'));
+    
+    // Hide the "View all" link after showing all items
+    const viewAllLink = section.querySelector('.list-group-item.text-center');
+    if (viewAllLink) {
+        viewAllLink.style.display = 'none';
+    }
+    
+    // Adjust the column width to accommodate the widest list item
+    const allItems = section.querySelectorAll('.list-group-item');
+    let maxWidth = 0;
+    
+    allItems.forEach(item => {
+        const itemWidth = item.offsetWidth;
+        if (itemWidth > maxWidth) {
+            maxWidth = itemWidth;
+        }
+    });
+    
+    section.style.width = `${maxWidth + 20}px`; // Adding padding to ensure proper fit
+}
+
+
+function viewAllClients1(sectionId) {
+        var section = document.getElementById(sectionId);
+        var items = section.getElementsByClassName('list-group-item d-none');
+        for (var i = 0; i < items.length; i++) {
+            items[i].classList.remove('d-none');
+        }
+        // Optionally hide the "View all" link after revealing all items
+        var viewAllLink = section.querySelector('.text-center');
+        if (viewAllLink) {
+            viewAllLink.classList.add('d-none');
+        }
+    }
 
 
  

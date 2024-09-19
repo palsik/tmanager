@@ -417,8 +417,49 @@
                                         </ul>
                                         <small class="text-muted">Total: {{ recurring_tasks_approved|length }}</small>
                                     </div>
+                                     
+                                    <div class="row mt-4">
+                                        <!-- Start Listing the Recurring Task Clients -->
+                                        <div id="recurring-task-clients-section" class="col-md-12">
+                                            <h4>Recurring Task Clients</h4>
+                                            <ul class="list-group" style="max-height: 400px; overflow-y: auto;">
+                                                {% for client in clients_with_recurring_tasks %}
+                                                    <li class="list-group-item {% if forloop.counter > 10 %}d-none{% endif %}">
+                                                        <a href="{% url 'client_recurring_tasks' client.user.username %}">{{ client.user.username }}</a>
+                                                    </li>
+                                                {% endfor %}
+                                                {% if clients_with_recurring_tasks|length > 10 %}
+                                                    <li class="list-group-item text-center">
+                                                        <a href="#" onclick="viewAllClients('recurring-task-clients-section'); return false;">View all</a>
+                                                    </li>
+                                                {% endif %}
+                                            </ul>
+                                            <small class="text-muted">Total: {{ clients_with_recurring_tasks|length }}</small>
+                                        </div>
+
+                                            <!-- Start Listing the Single Task Clients -->
+                                            <div id="task-clients-section" class="col-md-12">
+                                                <h4>Single Task Clients</h4>
+                                                <ul class="list-group" style="max-height: 400px; overflow-y: auto;">
+                                                    {% for client in clients_with_tasks %}
+                                                        <li class="list-group-item {% if forloop.counter > 10 %}d-none{% endif %}">
+                                                            <a href="{% url 'client_task_details' client.user.username %}">{{ client.user.username }}</a>
+                                                        </li>
+                                                    {% endfor %}
+                                                    {% if clients_with_tasks|length > 10 %}
+                                                        <li class="list-group-item text-center">
+                                                            <a href="#" onclick="viewAllClients1('task-clients-section'); return false;">View all</a>
+                                                        </li>
+                                                    {% endif %}
+                                                </ul>
+                                                <small class="text-muted">Total: {{ clients_with_tasks|length }}</small>
+                                            </div>
+                                    </div>
                                     
-                                
+
+                                    <!-- Start Listing the Reccuring Task CLient -->
+
+                                    </div>
                                 
                                 
                                 
@@ -431,7 +472,10 @@
                             <!-- END of inserting tasks status dashboard -->
 
                             <!-- [ Main Content ] start -->
-                          </div>
+                          
+                            
+                       
+                        </div>
                     </div>
                 </div>
             </div>

@@ -35,6 +35,7 @@ urlpatterns = [
     path('update_recurring_task/<int:task_id>/', views.update_recurring_task, name='update_recurring_task'),
     #path('recurring_task/<int:task_id>/', views.recurring_task_detail, name='recurring_task_detail'),
     path('client_recurring_tasks/<int:client_id>/', views.client_recurring_tasks, name='client_recurring_tasks'),
+    path('client_tasks/<int:client_id>/', views.client_tasks, name='client_task_details'),
     path('personnel/<str:personnel_username>/Rtasks/', views.personnel_assigned_Rtasks, name='personnel_assigned_Rtasks'),
     path('recurring_task/<int:task_id>/', views.personnel_recurring_task_detail, name='personnel_recurring_task_detail'),
     path('supervisor/recurring_task/<int:task_id>/', views.supervisor_recurring_task_detail, name='supervisor_recurring_task_detail'),

@@ -870,6 +870,14 @@ def update_recurring_task(request, task_id):
 #         'months': months,
 #     })
 
+def client_tasks(request, client_username):
+    client = get_object_or_404(Profile1, user__username=client_username)
+    tasks = Task.objects.filter(client=client)
+    return render(request, 'home/client_recurring_tasks.html', {
+        'client': client,
+        'tasks': tasks,
+    })
+
 def client_recurring_tasks(request, client_username):
     client = get_object_or_404(Profile1, user__username=client_username)
     recurring_tasks = RecurringTask.objects.filter(client=client)

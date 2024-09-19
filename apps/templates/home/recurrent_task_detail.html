@@ -49,6 +49,7 @@
                                       
                                     <h1>{{ task.task_name }}</h1>
                                     <p>{{ task.description }}</p> 
+                                    <p>{{ task.client }}</p> 
                                     <h3>Task Updates:</h3>
                                     <ul>
                                         {% for update in task.updates.all %}

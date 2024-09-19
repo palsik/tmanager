@@ -31,6 +31,7 @@
                                         <h1>{{ task.task_name }}</h1>
                                         <p>{{ task.description }}</p>
                                         <p>Status: {{ task.status }}</p>
+                                        <p>Client: {{ task.client }}</p>
                                         
                                         <h2>Update Task Status</h2>
                                             <form method="post" action="{% url 'supervisor_recurring_task_detail' task.id %}">
