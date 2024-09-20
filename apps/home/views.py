@@ -554,13 +554,24 @@ def supervisor_dashboard(request):
 @login_required
 def task_detail(request, task_id):
     print('The mail task detail has been reached')
+    
+    # Get the task object
     task = get_object_or_404(Task, task_id=task_id)
+    
+    # Get the user's profile
     user_profile = Profile1.objects.get(user=request.user)
+    
+    # Attempt to fetch the client profile using the client field in the task (which is a string)
+    client_profile = Profile1.objects.filter(user__username=task.client).first()
+    
     directories = TaskDirectory.objects.filter(task=task)
     files = TaskFile.objects.filter(directory__in=directories)
     costs = TaskCost.objects.filter(task=task)
 
     if request.method == 'POST':
+        # Code for handling POST requests for status update, directory creation, file upload, and cost addition
+        
+        # Status update logic
         if 'update_status' in request.POST:
             new_status = request.POST.get('status')
             print('condition for Post update status met')
@@ -577,6 +588,8 @@ def task_detail(request, task_id):
                     send_status_email_to_supervisor(task, 'office@nelkins.com')
             task.save()
             return redirect('task_detail', task_id=task_id)
+
+        # Directory creation logic
         elif 'create_directory' in request.POST:
             directory_name = request.POST.get('directory_name')
             if directory_name:
@@ -586,6 +599,8 @@ def task_detail(request, task_id):
                     created_by=request.user
                 )
                 return redirect('task_detail', task_id=task_id)
+        
+        # File upload logic
         elif 'upload_file' in request.POST:
             description = request.POST.get('file_description', '')
             if 'file' in request.FILES:
@@ -596,6 +611,8 @@ def task_detail(request, task_id):
                     description=description
                 )
                 return redirect('task_detail', task_id=task_id)
+        
+        # Cost addition logic
         elif 'add_cost' in request.POST:
             description = request.POST.get('cost_description')
             amount = request.POST.get('cost_amount')
@@ -611,6 +628,7 @@ def task_detail(request, task_id):
     return render(request, 'home/task_detail.html', {
         'task': task,
         'user_profile': user_profile,
+        'client_profile': client_profile,  # Pass the client profile to the template
         'directories': directories,
         'files': files,
         'costs': costs,
