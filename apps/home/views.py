@@ -997,7 +997,9 @@ def supervisor_recurring_task_detail(request, task_id):
         'task': task,
         'updates': updates,
         'directories': directories,
+        'client': task.client,  # Pass the client to the template
     })
+
 
 def send_status_email_to_personnel1(task, recipient_email):
     print(f'send reccurring status to personnel is reached to {recipient_email}.')

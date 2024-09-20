@@ -31,7 +31,7 @@
                                         <div class="container">
                                             <h1>Task: {{ task.task_name }}</h1>
                                             <p>Status: {{ task.status }}</p>
-                                            <p>Client: {{ task.client }}</p>
+                                            <p>Client: {{ task.client.user.username }}</p>
                                             <p>Assigned to: {{ task.assigned_personnel.user.username }}</p>
                                             <p>Task Description: {{ task.description }}</p>
                                     
