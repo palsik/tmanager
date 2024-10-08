@@ -174,12 +174,6 @@ def fetch_clients(request):
         return JsonResponse({"clients": client_list})
     return JsonResponse({"error": "Invalid request"}, status=400)
 
-
-from django.http import JsonResponse
-from django.db.models import Min
-from .models import Task, Profile1, TaskAssignmentCount  # Adjust imports based on your project structure
-from django.core.exceptions import ObjectDoesNotExist
-
 def assign_task(request):
     if request.method == 'POST':
         task_id = request.POST.get('task_id')
@@ -188,9 +182,14 @@ def assign_task(request):
         print('This is the department selected: ' + department)  # Print department selection
 
         if not task_id and department:  # When department is selected without task
-            # Get all personnel in the department and their task counts
+            # Get all personnel in the department and their task counts (ONLY from Task model, not RecurringTask)
             personnel_in_department = Profile1.objects.filter(department=department, user_type='personnel')
-            personnel_counts = TaskAssignmentCount.objects.filter(personnel__profile1__in=personnel_in_department)
+
+            # Only count tasks from the `Task` model
+            personnel_counts = TaskAssignmentCount.objects.filter(
+                personnel__profile1__in=personnel_in_department,
+                task__isnull=False  # This excludes counts from recurring tasks
+            )
 
             # Debug information for fetched personnel and task counts
             print(f'Personnel fetched for department "{department}": {[person.username for person in personnel_in_department]}')
@@ -205,7 +204,7 @@ def assign_task(request):
             return JsonResponse({'success': True, 'personnel': list(eligible_personnel_list)})
 
         if task_id and assigned_to:
-            print('this is the user ID of assigned_to ' + assigned_to)
+            print('This is the user ID of assigned_to ' + assigned_to)
 
             # Get the task
             try:
@@ -230,8 +229,11 @@ def assign_task(request):
             task.status = 'in_progress'
             task.save()
 
-            # Update the task count for the assigned personnel
-            assignment_count, created = TaskAssignmentCount.objects.get_or_create(personnel=assigned_personnel)
+            # Update the task count for the assigned personnel (only for `Task` model)
+            assignment_count, created = TaskAssignmentCount.objects.get_or_create(
+                personnel=assigned_personnel,
+                task__isnull=False  # Ensure only regular tasks are counted, not recurring ones
+            )
             assignment_count.task_count += 1
             assignment_count.department = department
             assignment_count.save()
@@ -241,7 +243,6 @@ def assign_task(request):
         return JsonResponse({'success': False, 'message': 'Task ID and Department are required'})
 
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
-
 # def get_personnel_by_department(request):
 #     department = request.GET.get('department')
 #     if department:
