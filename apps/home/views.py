@@ -175,66 +175,72 @@ def fetch_clients(request):
     return JsonResponse({"error": "Invalid request"}, status=400)
 
 
+from django.http import JsonResponse
+from django.db.models import Min
+from .models import Task, Profile1, TaskAssignmentCount  # Adjust imports based on your project structure
+from django.core.exceptions import ObjectDoesNotExist
+
 def assign_task(request):
     if request.method == 'POST':
         task_id = request.POST.get('task_id')
         department = request.POST.get('department')
         assigned_to = request.POST.get('assigned_to')
-        print('this is the user Id of assigned to ' + assigned_to)
+        print('This is the department selected: ' + department)  # Print department selection
 
-        if not task_id or not department:
-            return JsonResponse({'success': False, 'message': 'Task ID and Department are required'})
+        if not task_id and department:  # When department is selected without task
+            # Get all personnel in the department and their task counts
+            personnel_in_department = Profile1.objects.filter(department=department, user_type='personnel')
+            personnel_counts = TaskAssignmentCount.objects.filter(personnel__profile1__in=personnel_in_department)
 
-        # Get the task
-        try:
-            task = Task.objects.get(task_id=task_id)
-        except Task.DoesNotExist:
-            return JsonResponse({'success': False, 'message': 'Task not found'})
+            # Debug information for fetched personnel and task counts
+            print(f'Personnel fetched for department "{department}": {[person.username for person in personnel_in_department]}')
 
-        # Check if the task is pending
-        if task.status != 'pending':
-            return JsonResponse({'success': False, 'message': 'Only pending tasks can be assigned'})
+            # Find personnel with the minimum task count within the selected department
+            min_task_count = personnel_counts.aggregate(Min('task_count'))['task_count__min']
+            eligible_personnel = personnel_counts.filter(task_count=min_task_count)
 
-        # Get all personnel in the department and their task counts
-        personnel_in_department = Profile1.objects.filter(department=department, user_type='personnel')
-        personnel_counts = TaskAssignmentCount.objects.filter(personnel__profile1__in=personnel_in_department)
+            # Return eligible personnel for manual selection if task count is same for all personnel
+            eligible_personnel_list = eligible_personnel.values('personnel__id', 'personnel__first_name', 'personnel__last_name')
+            print(f'Eligible personnel: {list(eligible_personnel_list)}')  # Print fetched personnel
+            return JsonResponse({'success': True, 'personnel': list(eligible_personnel_list)})
 
-        # Find personnel with the minimum task count within the selected department
-        min_task_count = personnel_counts.aggregate(Min('task_count'))['task_count__min']
-        eligible_personnel = personnel_counts.filter(task_count=min_task_count)
+        if task_id and assigned_to:
+            print('this is the user ID of assigned_to ' + assigned_to)
 
-        # if not eligible_personnel.exists():
-        #     return JsonResponse({'success': False, 'message': 'No eligible personnel found in the selected department'})
-
-        # If all personnel have the same count, return all personnel for manual selection
-        if assigned_to:
+            # Get the task
             try:
-                # assigned_personnel = Profile1.objects.get(assigned_to)
-                # assigned_personnel = Profile1.objects.get(uniqueId=assigned_to)
+                task = Task.objects.get(task_id=task_id)
+            except Task.DoesNotExist:
+                return JsonResponse({'success': False, 'message': 'Task not found'})
+
+            # Check if the task is pending
+            if task.status != 'pending':
+                return JsonResponse({'success': False, 'message': 'Only pending tasks can be assigned'})
+
+            # Check if specific personnel is assigned
+            try:
                 assigned_profile = Profile1.objects.get(uniqueId=assigned_to)
                 assigned_user = assigned_profile.username
-                assigned_personnel = User.objects.get(username=assigned_user)            
-
+                assigned_personnel = User.objects.get(username=assigned_user)
             except (ValueError, ObjectDoesNotExist):
                 return JsonResponse({'success': False, 'message': 'Invalid user ID'})
-        else:
-            eligible_personnel_list = eligible_personnel.values('personnel__id', 'personnel__first_name', 'personnel__last_name')
-            return JsonResponse({'success': False, 'message': 'All eligible personnel have the same task count. Please select one manually.', 'personnel': list(eligible_personnel_list)})
 
-        # Assign the task to the selected personnel
-        task.assigned_personnel = assigned_personnel
-        task.status = 'in_progress'
-        task.save()
+            # Assign the task to the selected personnel
+            task.assigned_personnel = assigned_personnel
+            task.status = 'in_progress'
+            task.save()
 
-        # Update the task count for the assigned personnel
-        assignment_count, created = TaskAssignmentCount.objects.get_or_create(personnel=assigned_personnel)
-        assignment_count.task_count += 1
-        assignment_count.department = department
-        assignment_count.save()
+            # Update the task count for the assigned personnel
+            assignment_count, created = TaskAssignmentCount.objects.get_or_create(personnel=assigned_personnel)
+            assignment_count.task_count += 1
+            assignment_count.department = department
+            assignment_count.save()
 
-        return JsonResponse({'success': True, 'message': 'Task assigned successfully'})
+            return JsonResponse({'success': True, 'message': 'Task assigned successfully'})
+
+        return JsonResponse({'success': False, 'message': 'Task ID and Department are required'})
+
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
-
 
 # def get_personnel_by_department(request):
 #     department = request.GET.get('department')

@@ -128,6 +128,8 @@
             <div class="modal-body">
                 <form id="assignTaskForm" action="{% url 'assign_task' %}" method="POST">
                     {% csrf_token %}
+                    
+                    <!-- Task Selection -->
                     <div class="form-group">
                         <label for="task_id">Task</label>
                         <div class="input-group">
@@ -140,10 +142,12 @@
                                 {% endfor %}
                             </select>
                             <div class="input-group-append">
-                                <a class="btn btn-outline-secondary" id="refreshTasksButton" role="button">Refresh</a>
+                                <button type="button" class="btn btn-outline-secondary" id="refreshTasksButton">Refresh</button>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Department Selection -->
                     <div class="form-group">
                         <label for="department">Department</label>
                         <select class="form-control" id="department" name="department" required>
@@ -152,18 +156,22 @@
                             <option value="bookkeeping">Bookkeeping</option>
                         </select>
                     </div>
+
+                    <!-- Personnel Selection -->
                     <div class="form-group">
                         <label for="assigned_to">Assign to Personnel</label>
                         <select class="form-control" id="assigned_to" name="assigned_to" required>
                             <option value="">Select Personnel</option>
                         </select>
                     </div>
+
                     <button type="submit" class="btn btn-primary">Assign Task</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 
 <!--Add a reccurent Task model-->
 <div class="modal fade" id="addRecurringTaskModal" tabindex="-1" role="dialog" aria-labelledby="addRecurringTaskModalLabel" aria-hidden="true">
